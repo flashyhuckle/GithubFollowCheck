@@ -10,7 +10,6 @@ import UIKit
 class ListViewController: UIViewController {
     
     let defaults = UserDefaults.standard
-    
     var favoriteUsers = [String]()
     
     var results = [Result]() {
@@ -20,8 +19,6 @@ class ListViewController: UIViewController {
     }
     var filteredArray = [Result]()
     var page = 1
-    
-    var searchedUser: String?
     
     let tableView: UITableView = {
         let table = UITableView()
@@ -35,7 +32,21 @@ class ListViewController: UIViewController {
     var favoritesBarButtonOFF = UIBarButtonItem()
     var searchAllButton = UIBarButtonItem()
     
-    var apiManager = ApiManager()
+    private var apiManager = ApiManager()
+    private let searchedUser: String?
+    var didTapTableViewCell: ((Result?) -> Void)?
+    
+    init(apiManager: ApiManager, searchedUser: String?, didTapTableViewCell: ((Result?) -> Void)?) {
+        self.apiManager = apiManager
+        self.searchedUser = searchedUser
+        self.didTapTableViewCell = didTapTableViewCell
+        
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError()
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -112,9 +123,12 @@ extension ListViewController: UITableViewDelegate, UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let vc = DetailViewController()
-        vc.user = results[indexPath.row]
-        navigationController?.pushViewController(vc, animated: true)
+        //TODO: Connect Coordinator
+        didTapTableViewCell?(filteredArray[indexPath.row])
+//        
+//        let vc = DetailViewController()
+//        vc.user = results[indexPath.row]
+//        navigationController?.pushViewController(vc, animated: true)
     }
     
     func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
@@ -160,7 +174,7 @@ extension ListViewController: ApiManagerDelegate {
 extension ListViewController: UISearchBarDelegate {
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         filteredArray = results.filter { $0.login.lowercased().contains(searchText.lowercased()) }
-        if searchText.count == 0 {
+        if searchText.isEmpty {
             filteredArray = results
         }
         self.tableView.reloadData()

@@ -15,6 +15,15 @@ class DetailViewController: UIViewController {
     
     let imageView = UIImageView()
     
+    init(user: Result) {
+        super.init(nibName: nil, bundle: nil)
+        self.user = user
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError()
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         

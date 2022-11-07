@@ -9,10 +9,26 @@ import UIKit
 
 class MainViewController: UIViewController {
     
-    let searchButton = UIButton()
-    let favoritesButton = UIButton()
+    var didTapSearchButton: ((String?) -> Void)?
+    var didTapFavoritesButton: (() -> Void)?
     
+    let searchButton: UIButton = {
+        let button: UIButton = UIButton()
+        return button
+    }()
+    
+    let favoritesButton = UIButton()
     let textField = UITextField()
+    
+    init(didTapSearchButton: ((String?) -> Void)?, didTapFavoritesButton: (() -> Void)?) {
+        super.init(nibName: nil, bundle: nil)
+        self.didTapSearchButton = didTapSearchButton
+        self.didTapFavoritesButton = didTapFavoritesButton
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError()
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -45,19 +61,16 @@ class MainViewController: UIViewController {
         favoritesButton.addTarget(self, action: #selector(favoritesButtonPressed), for: .touchUpInside)
         view.addSubview(favoritesButton)
     }
+    
     override func viewWillAppear(_ animated: Bool) {
         textField.text = nil
     }
     
-    
     @objc func searchButtonPressed() {
-        let vc = ListViewController()
-        vc.searchedUser = textField.text
-        navigationController?.pushViewController(vc, animated: true)
+        didTapSearchButton?(textField.text)
     }
     
     @objc func favoritesButtonPressed() {
-        let vc = FavoritesViewController()
-        navigationController?.pushViewController(vc, animated: true)
+        didTapFavoritesButton?()
     }
 }

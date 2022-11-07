@@ -9,15 +9,25 @@ import UIKit
 
 class FavoritesViewController: UIViewController {
     
+    var didTapTableViewCell: ((String?) -> Void)?
     let defaults = UserDefaults.standard
     
-    var favoriteUsers = [String]()
+    private var favoriteUsers = [String]()
     
     let tableView: UITableView = {
         let table = UITableView()
         table.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
         return table
     }()
+    
+    init(didTapTableViewCell: ((String?) -> Void)?) {
+        super.init(nibName: nil, bundle: nil)
+        self.didTapTableViewCell = didTapTableViewCell
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError()
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -59,8 +69,7 @@ extension FavoritesViewController: UITableViewDataSource, UITableViewDelegate {
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let vc = ListViewController()
-        vc.searchedUser = favoriteUsers[indexPath.row]
-        navigationController?.pushViewController(vc, animated: true)
+        //TODO: Connect coordinator
+        didTapTableViewCell?(favoriteUsers[indexPath.row])
     }
 }
