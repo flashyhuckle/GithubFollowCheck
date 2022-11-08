@@ -9,11 +9,24 @@ import UIKit
 
 class DetailViewController: UIViewController {
     
-    var user: Result?
+    private var user: Result?
     
-    let label = UILabel()
+    private lazy var label: UILabel = {
+        let label = UILabel()
+        label.textColor = .white
+        label.textAlignment = .center
+        label.frame = CGRect(x: view.bounds.width/2 - 100, y: view.bounds.height/2, width: 200, height: 100)
+        label.text = user?.login
+        return label
+    }()
     
-    let imageView = UIImageView()
+    private lazy var imageView: UIImageView = {
+        let imageView = UIImageView()
+        imageView.layer.cornerRadius = imageView.frame.height/2
+        imageView.clipsToBounds = true
+        imageView.frame = CGRect(x: view.bounds.width/2 - 100, y: view.bounds.height/2 - 250, width: 200, height: 200)
+        return imageView
+    }()
     
     init(user: Result) {
         super.init(nibName: nil, bundle: nil)
@@ -26,25 +39,20 @@ class DetailViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        view.addSubview(label)
-        label.frame = CGRect(x: view.bounds.width/2 - 100, y: view.bounds.height/2, width: 200, height: 100)
-        label.textColor = .white
-        label.text = user?.login
-        label.textAlignment = .center
+        setUpLayout()
+    }
+    
+    private func setUpLayout() {
         view.backgroundColor = .blue
-        
+        view.addSubview(label)
         view.addSubview(imageView)
-        imageView.frame = CGRect(x: view.bounds.width/2 - 100, y: view.bounds.height/2 - 250, width: 200, height: 200)
-        imageView.layer.cornerRadius = imageView.frame.height/2
-        imageView.clipsToBounds = true
         
         if let url = URL(string: user!.avatar_url) {
             downloadImage(from: url)
         }
     }
     
-    func downloadImage(from url: URL) {
+    private func downloadImage(from url: URL) {
         getData(from: url) { data, response, error in
             guard let data = data, error == nil else { return }
             DispatchQueue.main.async() { [weak self] in
@@ -53,7 +61,7 @@ class DetailViewController: UIViewController {
         }
     }
     
-    func getData(from url: URL, completion: @escaping (Data?, URLResponse?, Error?) -> ()) {
+    private func getData(from url: URL, completion: @escaping (Data?, URLResponse?, Error?) -> ()) {
         URLSession.shared.dataTask(with: url, completionHandler: completion).resume()
     }
 }

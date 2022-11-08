@@ -9,32 +9,41 @@ import UIKit
 
 class ListViewController: UIViewController {
     
-    let defaults = UserDefaults.standard
-    var favoriteUsers = [String]()
+    private let defaults = UserDefaults.standard
+    private var favoriteUsers = [String]()
     
-    var results = [Result]() {
+    private var results = [Result]() {
         didSet {
             filteredArray = results
         }
     }
-    var filteredArray = [Result]()
-    var page = 1
+    private var filteredArray = [Result]()
+    private var page = 1
     
-    let tableView: UITableView = {
+    private lazy var tableView: UITableView = {
         let table = UITableView()
         table.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
+        table.backgroundColor = .red
+        table.frame = view.bounds
         return table
     }()
     
-    let searchBar = UISearchBar()
+    private let searchBar: UISearchBar = {
+        let searchBar = UISearchBar()
+        searchBar.searchBarStyle = UISearchBar.Style.default
+        searchBar.placeholder = " Search..."
+        searchBar.isTranslucent = false
+        searchBar.sizeToFit()
+        return searchBar
+    }()
     
-    var favoritesBarButtonON = UIBarButtonItem()
-    var favoritesBarButtonOFF = UIBarButtonItem()
-    var searchAllButton = UIBarButtonItem()
+    lazy var favoritesBarButtonON = UIBarButtonItem(image: UIImage(systemName: "star"), style: .plain, target: self, action: #selector(favoritesPressed))
+    lazy var favoritesBarButtonOFF = UIBarButtonItem(image: UIImage(systemName: "star.fill"), style: .plain, target: self, action: #selector(favoritesPressed))
+    lazy var searchAllButton = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(searchAll))
     
     private var apiManager = ApiManager()
     private let searchedUser: String?
-    var didTapTableViewCell: ((Result?) -> Void)?
+    private var didTapTableViewCell: ((Result?) -> Void)?
     
     init(apiManager: ApiManager, searchedUser: String?, didTapTableViewCell: ((Result?) -> Void)?) {
         self.apiManager = apiManager
@@ -50,63 +59,60 @@ class ListViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        if let fav = defaults.array(forKey: "favoriteUsers") as? [String] {
-            favoriteUsers = fav
-        }
-        
+        setUpViews()
+        handlingUser()
+    }
+    
+    private func setUpViews() {
         view.backgroundColor = .white
         title = searchedUser
         
-        favoritesBarButtonON = UIBarButtonItem(image: UIImage(systemName: "star"), style: .plain, target: self, action: #selector(favoritesPressed))
-        favoritesBarButtonOFF = UIBarButtonItem(image: UIImage(systemName: "star.fill"), style: .plain, target: self, action: #selector(favoritesPressed))
-        searchAllButton = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(searchAll))
+        apiManager.delegate = self
         
-        if favoriteUsers.contains(searchedUser!) {
+        tableView.delegate = self
+        tableView.dataSource = self
+        view.addSubview(tableView)
+        
+        searchBar.delegate = self
+        tableView.addSubview(searchBar)
+    }
+    
+    private func handlingUser() {
+        if let fav = defaults.array(forKey: "favoriteUsers") as? [String] {
+            favoriteUsers = fav
+        }
+        guard let searchedUser = searchedUser else { return }
+        apiManager.fetchData(username: searchedUser)
+        
+        if favoriteUsers.contains(searchedUser) {
             navigationItem.rightBarButtonItems = [searchAllButton, favoritesBarButtonOFF]
         } else {
             navigationItem.rightBarButtonItems = [searchAllButton, favoritesBarButtonON]
         }
-        
-        tableView.delegate = self
-        tableView.dataSource = self
-        apiManager.delegate = self
-        
-        tableView.backgroundColor = .red
-        tableView.frame = view.bounds
-        view.addSubview(tableView)
-        
-        searchBar.searchBarStyle = UISearchBar.Style.default
-        searchBar.placeholder = " Search..."
-        searchBar.isTranslucent = false
-        searchBar.sizeToFit()
-        searchBar.delegate = self
-        tableView.addSubview(searchBar)
-        
-        if searchedUser != nil {
-            apiManager.fetchData(username: searchedUser!)
-        }
     }
     
-    @objc func favoritesPressed() {
-        if favoriteUsers.contains(searchedUser!) {
-            favoriteUsers = favoriteUsers.filter { $0 != searchedUser!}
+    @objc private func favoritesPressed() {
+        guard let searchedUser = searchedUser else { return }
+        if searchedUser.isEmpty { return }
+        if favoriteUsers.contains(searchedUser) {
+            favoriteUsers = favoriteUsers.filter { $0 != searchedUser}
             defaults.set(favoriteUsers, forKey: "favoriteUsers")
             navigationItem.setRightBarButtonItems([searchAllButton, favoritesBarButtonON], animated: false)
         } else {
-            favoriteUsers.append(searchedUser!)
+            favoriteUsers.append(searchedUser)
             navigationItem.setRightBarButtonItems([searchAllButton, favoritesBarButtonOFF], animated: false)
             defaults.set(favoriteUsers, forKey: "favoriteUsers")
         }
     }
     
-    @objc func searchAll() {
+    @objc private func searchAll() {
         page += 1
-        if searchedUser != nil {
-            apiManager.fetchData(username: searchedUser!, page: page, getAll: true)
-        }
+        guard let searchedUser = searchedUser else { return }
+        apiManager.fetchData(username: searchedUser, page: page, getAll: true)
     }
 }
+
+//MARK: TableView functions
 
 extension ListViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -123,24 +129,20 @@ extension ListViewController: UITableViewDelegate, UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        //TODO: Connect Coordinator
         didTapTableViewCell?(filteredArray[indexPath.row])
-//        
-//        let vc = DetailViewController()
-//        vc.user = results[indexPath.row]
-//        navigationController?.pushViewController(vc, animated: true)
     }
     
     func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
         let lastItem = results.count - 1
         if indexPath.row == lastItem {
             page += 1
-            if searchedUser != nil {
-                apiManager.fetchData(username: searchedUser!, page: page)
-            }
+            guard let searchedUser = searchedUser else { return }
+            apiManager.fetchData(username: searchedUser, page: page)
         }
     }
 }
+
+//MARK: API Delegate
 
 extension ListViewController: ApiManagerDelegate {
     
@@ -161,7 +163,8 @@ extension ListViewController: ApiManagerDelegate {
         } else {
             results += result
             page += 1
-            apiManager.fetchData(username: searchedUser!, page: page, getAll: true)
+            guard let searchedUser = searchedUser else { return }
+            apiManager.fetchData(username: searchedUser, page: page, getAll: true)
             print("\(results.count) results and counting...")
         }
     }
@@ -179,5 +182,4 @@ extension ListViewController: UISearchBarDelegate {
         }
         self.tableView.reloadData()
     }
-    
 }

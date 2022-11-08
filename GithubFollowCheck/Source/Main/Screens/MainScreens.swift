@@ -12,21 +12,3 @@ struct MainScreens {
         MainViewController(didTapSearchButton: didTapSearchButton, didTapFavoritesButton: didTapFavoritesButton)
     }
 }
-
-struct ListScreens {
-    func createListViewController(apiManager: ApiManager, searchedUser: String?, didTapTableViewCell: ((Result?) -> Void)?) -> ListViewController {
-        ListViewController(apiManager: apiManager, searchedUser: searchedUser, didTapTableViewCell: didTapTableViewCell)
-    }
-}
-
-struct FavoritesScreens {
-    func createFavoritesViewController(didTapTableViewCell: ((String?) -> Void)?) -> FavoritesViewController {
-        FavoritesViewController(didTapTableViewCell: didTapTableViewCell)
-    }
-}
-
-struct DetailScreens {
-    func createDetailViewController(user: Result) -> DetailViewController {
-        DetailViewController(user: user)
-    }
-}

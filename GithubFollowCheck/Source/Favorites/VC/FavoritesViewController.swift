@@ -7,16 +7,17 @@
 
 import UIKit
 
-class FavoritesViewController: UIViewController {
+final class FavoritesViewController: UIViewController {
     
     var didTapTableViewCell: ((String?) -> Void)?
     let defaults = UserDefaults.standard
     
     private var favoriteUsers = [String]()
     
-    let tableView: UITableView = {
+    private lazy var tableView: UITableView = {
         let table = UITableView()
         table.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
+        table.frame = view.bounds
         return table
     }()
     
@@ -31,18 +32,16 @@ class FavoritesViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        setUpViews()
+    }
+    
+    private func setUpViews() {
         view.addSubview(tableView)
-        tableView.frame = view.bounds
         tableView.dataSource = self
         tableView.delegate = self
         
         view.backgroundColor = .white
         tableView.backgroundColor = .green
-        
-        if let fav = defaults.array(forKey: "favoriteUsers") as? [String] {
-            favoriteUsers = fav
-        }
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -53,6 +52,8 @@ class FavoritesViewController: UIViewController {
         }
     }
 }
+
+//MARK: TableView functions
 
 extension FavoritesViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
