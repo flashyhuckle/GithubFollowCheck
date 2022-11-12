@@ -30,7 +30,7 @@ struct ApiManager {
             let session = URLSession(configuration: .default)
             let task = session.dataTask(with: url) { data, response, error in
                 if error != nil {
-                    fatalError()
+//                    fatalError()
                 }
                 if let data = data {
                     do {

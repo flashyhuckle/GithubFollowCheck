@@ -17,29 +17,31 @@ class ListViewController: UIViewController {
             filteredArray = results
         }
     }
+    
     private var filteredArray = [Result]()
     private var page = 1
     
     private lazy var tableView: UITableView = {
         let table = UITableView()
         table.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
-        table.backgroundColor = .red
-        table.frame = view.bounds
+        table.register(ListViewSearchBarCell.self, forCellReuseIdentifier: "SearchBarCell")
+        table.translatesAutoresizingMaskIntoConstraints = false
         return table
     }()
     
-    private let searchBar: UISearchBar = {
-        let searchBar = UISearchBar()
-        searchBar.searchBarStyle = UISearchBar.Style.default
-        searchBar.placeholder = " Search..."
-        searchBar.isTranslucent = false
-        searchBar.sizeToFit()
-        return searchBar
-    }()
+//    private let searchBar: UISearchBar = {
+//        let searchBar = UISearchBar()
+//        searchBar.searchBarStyle = UISearchBar.Style.default
+//        searchBar.placeholder = " Search..."
+//        searchBar.isTranslucent = false
+//        searchBar.sizeToFit()
+//        searchBar.translatesAutoresizingMaskIntoConstraints = false
+//        return searchBar
+//    }()
     
-    lazy var favoritesBarButtonON = UIBarButtonItem(image: UIImage(systemName: "star"), style: .plain, target: self, action: #selector(favoritesPressed))
-    lazy var favoritesBarButtonOFF = UIBarButtonItem(image: UIImage(systemName: "star.fill"), style: .plain, target: self, action: #selector(favoritesPressed))
-    lazy var searchAllButton = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(searchAll))
+    private lazy var favoritesBarButtonON = UIBarButtonItem(image: UIImage(systemName: "star"), style: .plain, target: self, action: #selector(favoritesPressed))
+    private lazy var favoritesBarButtonOFF = UIBarButtonItem(image: UIImage(systemName: "star.fill"), style: .plain, target: self, action: #selector(favoritesPressed))
+    private lazy var searchAllButton = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(searchAll))
     
     private var apiManager = ApiManager()
     private let searchedUser: String?
@@ -60,6 +62,7 @@ class ListViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setUpViews()
+        setUpContstraints()
         handlingUser()
     }
     
@@ -73,8 +76,18 @@ class ListViewController: UIViewController {
         tableView.dataSource = self
         view.addSubview(tableView)
         
-        searchBar.delegate = self
-        tableView.addSubview(searchBar)
+//        searchBar.delegate = self
+//        view.addSubview(searchBar)
+        
+        }
+    
+    private func setUpContstraints() {
+        NSLayoutConstraint.activate([
+            tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        ])
     }
     
     private func handlingUser() {
@@ -116,20 +129,27 @@ class ListViewController: UIViewController {
 
 extension ListViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return filteredArray.count
+        return filteredArray.count + 1
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        if let cell = tableView.dequeueReusableCell(withIdentifier: "cell") {
-            cell.textLabel?.text = filteredArray[indexPath.row].login
-            cell.accessoryType = .disclosureIndicator
-            return cell
+        if indexPath.row == 0 {
+            if let cell = tableView.dequeueReusableCell(withIdentifier: "SearchBarCell") as? ListViewSearchBarCell {
+                cell.searchBar.delegate = self
+                return cell
+            }
+        } else {
+            if let cell = tableView.dequeueReusableCell(withIdentifier: "cell") {
+                cell.textLabel?.text = filteredArray[indexPath.row-1].login
+                cell.accessoryType = .disclosureIndicator
+                return cell
+            }
         }
         return UITableViewCell()
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        didTapTableViewCell?(filteredArray[indexPath.row])
+        didTapTableViewCell?(filteredArray[indexPath.row - 1])
     }
     
     func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
@@ -173,6 +193,8 @@ extension ListViewController: ApiManagerDelegate {
         print(error)
     }
 }
+
+//MARK: Searchbar Delegate
 
 extension ListViewController: UISearchBarDelegate {
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
