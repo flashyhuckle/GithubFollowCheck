@@ -19,8 +19,6 @@ class ListViewSearchBarCell: UITableViewCell {
         return searchBar
     }()
     
-    let delegate = UISearchBarDelegate?.self
-    
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: .default, reuseIdentifier: "SearchBarCell")
         self.setUpLayout()

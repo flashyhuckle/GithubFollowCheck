@@ -9,15 +9,15 @@ import UIKit
 
 final class FavoritesViewController: UIViewController {
     
-    var didTapTableViewCell: ((String?) -> Void)?
-    let defaults = UserDefaults.standard
+    private var didTapTableViewCell: ((String?) -> Void)?
+    private let defaults = UserDefaults.standard
     
     private var favoriteUsers = [String]()
     
     private lazy var tableView: UITableView = {
         let table = UITableView()
         table.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
-        table.frame = view.bounds
+        table.translatesAutoresizingMaskIntoConstraints = false
         return table
     }()
     
@@ -33,15 +33,24 @@ final class FavoritesViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setUpViews()
+        setUpConstraints()
     }
     
     private func setUpViews() {
+        title = "Favorites"
+        view.backgroundColor = .green
         view.addSubview(tableView)
         tableView.dataSource = self
         tableView.delegate = self
-        
-        view.backgroundColor = .white
-        tableView.backgroundColor = .green
+    }
+    
+    private func setUpConstraints() {
+        NSLayoutConstraint.activate([
+            tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        ])
     }
     
     override func viewWillAppear(_ animated: Bool) {

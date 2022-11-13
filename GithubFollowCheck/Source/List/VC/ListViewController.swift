@@ -29,16 +29,6 @@ class ListViewController: UIViewController {
         return table
     }()
     
-//    private let searchBar: UISearchBar = {
-//        let searchBar = UISearchBar()
-//        searchBar.searchBarStyle = UISearchBar.Style.default
-//        searchBar.placeholder = " Search..."
-//        searchBar.isTranslucent = false
-//        searchBar.sizeToFit()
-//        searchBar.translatesAutoresizingMaskIntoConstraints = false
-//        return searchBar
-//    }()
-    
     private lazy var favoritesBarButtonON = UIBarButtonItem(image: UIImage(systemName: "star"), style: .plain, target: self, action: #selector(favoritesPressed))
     private lazy var favoritesBarButtonOFF = UIBarButtonItem(image: UIImage(systemName: "star.fill"), style: .plain, target: self, action: #selector(favoritesPressed))
     private lazy var searchAllButton = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(searchAll))
@@ -62,26 +52,22 @@ class ListViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setUpViews()
-        setUpContstraints()
+        setUpConstraints()
         handlingUser()
     }
     
     private func setUpViews() {
-        view.backgroundColor = .white
         title = searchedUser
+        view.backgroundColor = .red
         
         apiManager.delegate = self
         
         tableView.delegate = self
         tableView.dataSource = self
         view.addSubview(tableView)
-        
-//        searchBar.delegate = self
-//        view.addSubview(searchBar)
-        
         }
     
-    private func setUpContstraints() {
+    private func setUpConstraints() {
         NSLayoutConstraint.activate([
             tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),

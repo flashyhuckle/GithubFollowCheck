@@ -90,17 +90,9 @@
 		A4774AC7291E480900C97E8D /* Cells */ = {
 			isa = PBXGroup;
 			children = (
-				A4774AC9291E483000C97E8D /* ListViewSearchBarCell */,
-			);
-			path = Cells;
-			sourceTree = "<group>";
-		};
-		A4774AC9291E483000C97E8D /* ListViewSearchBarCell */ = {
-			isa = PBXGroup;
-			children = (
 				A4774ACA291E484500C97E8D /* ListViewSearchBarCell.swift */,
 			);
-			path = ListViewSearchBarCell;
+			path = Cells;
 			sourceTree = "<group>";
 		};
 		A4854DAB291AE9D000AE8C7E /* Screens */ = {

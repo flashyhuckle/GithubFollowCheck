@@ -9,23 +9,29 @@ import UIKit
 
 class DetailViewController: UIViewController {
     
-    private var user: Result?
-    
-    private lazy var label: UILabel = {
-        let label = UILabel()
-        label.textColor = .white
-        label.textAlignment = .center
-        label.frame = CGRect(x: view.bounds.width/2 - 100, y: view.bounds.height/2, width: 200, height: 100)
-        label.text = user?.login
-        return label
-    }()
+    private var user: Result? {
+        didSet {
+            if let url = URL(string: user!.avatar_url) {
+                downloadImage(from: url)
+            }
+        }
+    }
     
     private lazy var imageView: UIImageView = {
         let imageView = UIImageView()
         imageView.layer.cornerRadius = imageView.frame.height/2
         imageView.clipsToBounds = true
-        imageView.frame = CGRect(x: view.bounds.width/2 - 100, y: view.bounds.height/2 - 250, width: 200, height: 200)
+        imageView.translatesAutoresizingMaskIntoConstraints = false
         return imageView
+    }()
+    
+    private lazy var label: UILabel = {
+        let label = UILabel()
+        label.textColor = .white
+        label.textAlignment = .center
+        label.text = user?.login
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
     }()
     
     init(user: Result) {
@@ -40,16 +46,34 @@ class DetailViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setUpLayout()
+        setUpConstraints()
     }
     
     private func setUpLayout() {
         view.backgroundColor = .blue
-        view.addSubview(label)
         view.addSubview(imageView)
+        view.addSubview(label)
         
         if let url = URL(string: user!.avatar_url) {
             downloadImage(from: url)
         }
+    }
+    
+    private func setUpConstraints() {
+        let width = 200.0
+        let height = 50.0
+        let spacing = 100.0
+        NSLayoutConstraint.activate([
+            imageView.heightAnchor.constraint(equalToConstant: width),
+            imageView.widthAnchor.constraint(equalToConstant: width),
+            imageView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            imageView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: spacing),
+            
+            label.heightAnchor.constraint(equalToConstant: height),
+            label.widthAnchor.constraint(equalToConstant: width),
+            label.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            label.topAnchor.constraint(equalTo: imageView.bottomAnchor, constant: spacing)
+        ])
     }
     
     private func downloadImage(from url: URL) {
