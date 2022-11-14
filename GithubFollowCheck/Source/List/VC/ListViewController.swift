@@ -21,11 +21,22 @@ class ListViewController: UIViewController {
     private var filteredArray = [Result]()
     private var page = 1
     
+    let searchBar: UISearchBar = {
+        let searchBar = UISearchBar()
+        searchBar.searchBarStyle = UISearchBar.Style.default
+        searchBar.placeholder = " Search..."
+        searchBar.isTranslucent = false
+        searchBar.sizeToFit()
+        searchBar.translatesAutoresizingMaskIntoConstraints = false
+        return searchBar
+    }()
+    
     private lazy var tableView: UITableView = {
         let table = UITableView()
         table.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
         table.register(ListViewSearchBarCell.self, forCellReuseIdentifier: "SearchBarCell")
         table.translatesAutoresizingMaskIntoConstraints = false
+        table.keyboardDismissMode = .onDrag
         return table
     }()
     
@@ -65,11 +76,25 @@ class ListViewController: UIViewController {
         tableView.delegate = self
         tableView.dataSource = self
         view.addSubview(tableView)
+        
+        searchBar.delegate = self
+        view.addSubview(searchBar)
         }
     
-    private func setUpConstraints() {
+    private func setUpConstraints(SBVisible: Bool = true) {
+        if SBVisible {
+            NSLayoutConstraint.activate([
+                searchBar.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+                searchBar.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+                searchBar.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+                tableView.topAnchor.constraint(equalTo: searchBar.bottomAnchor)
+            ])
+        } else {
+            NSLayoutConstraint.activate([
+                tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor)
+            ])
+        }
         NSLayoutConstraint.activate([
-            tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
@@ -115,35 +140,38 @@ class ListViewController: UIViewController {
 
 extension ListViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return filteredArray.count + 1
+        return filteredArray.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        if indexPath.row == 0 {
-            if let cell = tableView.dequeueReusableCell(withIdentifier: "SearchBarCell") as? ListViewSearchBarCell {
-                cell.searchBar.delegate = self
-                return cell
-            }
-        } else {
-            if let cell = tableView.dequeueReusableCell(withIdentifier: "cell") {
-                cell.textLabel?.text = filteredArray[indexPath.row-1].login
-                cell.accessoryType = .disclosureIndicator
-                return cell
-            }
+        if let cell = tableView.dequeueReusableCell(withIdentifier: "cell") {
+            cell.textLabel?.text = filteredArray[indexPath.row].login
+            cell.accessoryType = .disclosureIndicator
+            return cell
         }
         return UITableViewCell()
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        didTapTableViewCell?(filteredArray[indexPath.row - 1])
+        didTapTableViewCell?(filteredArray[indexPath.row])
+        tableView.deselectRow(at: indexPath, animated: true)
     }
     
     func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-        let lastItem = results.count - 1
-        if indexPath.row == lastItem {
+        let lastItem = results.count
+        if indexPath.row == lastItem - 1 {
             page += 1
             guard let searchedUser = searchedUser else { return }
             apiManager.fetchData(username: searchedUser, page: page)
+        }
+    }
+
+    func scrollViewWillEndDragging(_ scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>) {
+        if targetContentOffset.pointee.y < scrollView.contentOffset.y {
+            setUpConstraints(SBVisible: true)
+            print("sbshouldbevisible")
+        } else {
+            self.setUpConstraints(SBVisible: false)
         }
     }
 }
@@ -188,6 +216,7 @@ extension ListViewController: UISearchBarDelegate {
         if searchText.isEmpty {
             filteredArray = results
         }
-        self.tableView.reloadData()
+        tableView.reloadData()
     }
 }
+

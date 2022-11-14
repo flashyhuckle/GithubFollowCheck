@@ -9,13 +9,7 @@ import UIKit
 
 class DetailViewController: UIViewController {
     
-    private var user: Result? {
-        didSet {
-            if let url = URL(string: user!.avatar_url) {
-                downloadImage(from: url)
-            }
-        }
-    }
+    private var user: Result?
     
     private lazy var imageView: UIImageView = {
         let imageView = UIImageView()
