@@ -31,6 +31,11 @@ class ListViewController: UIViewController {
         return searchBar
     }()
     
+    private var topViewConstraint: NSLayoutConstraint?
+    private var topSearchBarConstraint: NSLayoutConstraint?
+    private var searchBarHeightConstraint: NSLayoutConstraint?
+    private var currentContentOffsetY: Double = 0
+    
     private lazy var tableView: UITableView = {
         let table = UITableView()
         table.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
@@ -81,24 +86,38 @@ class ListViewController: UIViewController {
         view.addSubview(searchBar)
         }
     
-    private func setUpConstraints(SBVisible: Bool = true) {
-        if SBVisible {
-            NSLayoutConstraint.activate([
-                searchBar.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-                searchBar.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-                searchBar.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-                tableView.topAnchor.constraint(equalTo: searchBar.bottomAnchor)
-            ])
-        } else {
-            NSLayoutConstraint.activate([
-                tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor)
-            ])
-        }
+    private func setUpConstraints() {
+        searchBarHeightConstraint = searchBar.heightAnchor.constraint(equalToConstant: 40.0)
+        NSLayoutConstraint.activate([
+            searchBar.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            searchBar.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            searchBar.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+        ])
+        searchBarHeightConstraint?.isActive = true
+
         NSLayoutConstraint.activate([
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            tableView.topAnchor.constraint(equalTo: searchBar.bottomAnchor),
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
+    }
+    
+    private func updateLayout(
+        isSearchBarVisible: Bool
+    ) {
+        switch isSearchBarVisible {
+        case true:
+            topViewConstraint?.isActive = false
+            topSearchBarConstraint?.isActive = true
+            searchBar.isHidden = false
+        case false:
+            topSearchBarConstraint?.isActive = false
+            topViewConstraint?.isActive = true
+            searchBar.isHidden = true
+        }
+
+        view.updateConstraintsIfNeeded()
     }
     
     private func handlingUser() {
@@ -166,13 +185,47 @@ extension ListViewController: UITableViewDelegate, UITableViewDataSource {
         }
     }
 
-    func scrollViewWillEndDragging(_ scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>) {
-        if targetContentOffset.pointee.y < scrollView.contentOffset.y {
-            setUpConstraints(SBVisible: true)
-            print("sbshouldbevisible")
-        } else {
-            self.setUpConstraints(SBVisible: false)
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        
+        if scrollView.contentOffset.y == 0 {
+            searchBarHeightConstraint?.constant = 40
         }
+        
+        guard scrollView.contentOffset.y > 0 else { return }
+
+        print("current: \(currentContentOffsetY) || SV: \(scrollView.contentOffset.y)")
+
+        if currentContentOffsetY > scrollView.contentOffset.y {
+            // W GÓRĘ
+            guard searchBarHeightConstraint?.constant != 40 else { return }
+            let growingHeight = currentContentOffsetY - scrollView.contentOffset.y
+            let currentHeight = searchBarHeightConstraint?.constant ?? 0.0
+            if growingHeight < 40.0 && growingHeight > currentHeight {
+                searchBarHeightConstraint?.constant = growingHeight
+            } else if growingHeight > 40 {
+                searchBarHeightConstraint?.constant = 40
+            }
+
+        } else if currentContentOffsetY < scrollView.contentOffset.y {
+            // W DÓŁ
+            guard searchBarHeightConstraint?.constant != 0 else { return }
+            let shrinkingHeight = scrollView.contentOffset.y - currentContentOffsetY
+            let currentHeight = searchBarHeightConstraint?.constant ?? 0.0
+            if shrinkingHeight < currentHeight && shrinkingHeight > 0 {
+                searchBarHeightConstraint?.constant = currentHeight - shrinkingHeight
+            } else if shrinkingHeight > currentHeight {
+                searchBarHeightConstraint?.constant = 0
+            }
+        }
+    }
+
+    func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
+//        currentDraggingContentOffsetY = scrollView.contentOffset.y
+        currentContentOffsetY = scrollView.contentOffset.y
+    }
+
+    func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
+        currentContentOffsetY = scrollView.contentOffset.y
     }
 }
 
