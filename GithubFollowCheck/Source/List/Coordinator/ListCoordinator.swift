@@ -14,7 +14,7 @@ final class ListCoordinator: CoordinatorType {
     private let screens: ListScreens = ListScreens()
     private let presenter: UINavigationController
     private let searchedUser: String?
-    private let apiManager: ApiManager
+//    private let apiManager: ApiManager
     
     //MARK: Child coordinators
     
@@ -22,16 +22,16 @@ final class ListCoordinator: CoordinatorType {
     
     //MARK: Initialization
     
-    init(presenter: UINavigationController, searchedUser: String?, apiManager: ApiManager) {
+    init(presenter: UINavigationController, searchedUser: String?) {
         self.presenter = presenter
         self.searchedUser = searchedUser
-        self.apiManager = apiManager
+//        self.apiManager = apiManager
     }
     
     //MARK: Start
     
     func start() {
-        let listViewController = screens.createListViewController(apiManager: apiManager, searchedUser: searchedUser) { [weak self] result in
+        let listViewController = screens.createListViewController(searchedUser: searchedUser) { [weak self] result in
             guard let self = self else { return }
             self.detailCoordinagor = DetailCoordinator(presenter: self.presenter, user: result!)
             self.detailCoordinagor?.start()

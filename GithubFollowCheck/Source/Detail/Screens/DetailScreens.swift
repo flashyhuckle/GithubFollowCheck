@@ -8,7 +8,7 @@
 import UIKit
 
 struct DetailScreens {
-    func createDetailViewController(user: Result) -> DetailViewController {
+    func createDetailViewController(user: UserDTO) -> DetailViewController {
         DetailViewController(user: user)
     }
 }

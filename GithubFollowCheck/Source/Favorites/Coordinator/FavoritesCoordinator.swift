@@ -13,7 +13,7 @@ final class FavoritesCoordinator: CoordinatorType {
     
     private let screens: FavoritesScreens = FavoritesScreens()
     private let presenter: UINavigationController
-    private let apiManager: ApiManager
+//    private let apiManager: ApiManager
     
     //MARK: Child coordinators
     
@@ -21,9 +21,9 @@ final class FavoritesCoordinator: CoordinatorType {
     
     //MARK: Initialization
     
-    init(presenter: UINavigationController, apiManager: ApiManager) {
+    init(presenter: UINavigationController) {
         self.presenter = presenter
-        self.apiManager = apiManager
+//        self.apiManager = apiManager
     }
     
     //MARK: Start
@@ -31,7 +31,7 @@ final class FavoritesCoordinator: CoordinatorType {
     func start() {
         let favoritesViewController = screens.createFavoritesViewController { [weak self] queryText in
             guard let self = self else { return }
-            self.listCoordinator = ListCoordinator(presenter: self.presenter, searchedUser: queryText, apiManager: self.apiManager)
+            self.listCoordinator = ListCoordinator(presenter: self.presenter, searchedUser: queryText)
             self.listCoordinator?.start()
         }
         presenter.pushViewController(favoritesViewController, animated: true)

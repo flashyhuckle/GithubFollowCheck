@@ -7,41 +7,100 @@
 
 import Foundation
 
-protocol ApiManagerDelegate {
-    func didReceiveResult(result: [Result])
-    func didReceiveResultOfMany(result: [Result])
-    func didFailWithError(error: Error)
+//protocol ApiManagerDelegate {
+//    func didReceiveResult(result: [ChujowyResult])
+//    func didReceiveResultOfMany(result: [ChujowyResult])
+//    func didFailWithError(error: Error)
+//}
+
+//struct ApiManager {
+//
+//    var delegate: ApiManagerDelegate?
+//
+//    let apiURL = "https://api.github.com/users/"
+//    let searchParameters = "/followers?per_page=100"
+//
+//    func fetchData(username: String, page: Int = 0, getAll: Bool = false) {
+//        let urlString = apiURL + username + searchParameters + "&page=\(page)"
+//        performRequest(with: urlString, getAll: getAll)
+//    }
+//
+//    func performRequest(with urlString: String, getAll: Bool = false) {
+//        if let url = URL(string: urlString) {
+//            let session = URLSession(configuration: .default)
+//            let task = session.dataTask(with: url) { data, response, error in
+//                if error != nil {
+////                    fatalError()
+//                }
+//                if let data = data {
+//                    do {
+//                        let decodedData = try JSONDecoder().decode([ChujowyResult].self, from: data)
+//                        if getAll {
+//                            delegate?.didReceiveResultOfMany(result: decodedData)
+//                        } else {
+//                            delegate?.didReceiveResult(result: decodedData)
+//                        }
+//                    } catch {
+//                        delegate?.didFailWithError(error: error)
+//                    }
+//                }
+//            }
+//            task.resume()
+//        }
+//    }
+//}
+//
+//struct ChujowyResult: Codable {
+//    let login: String
+//    let avatar_url: String
+//    let html_url: String
+//}
+
+protocol ApiManagerInterface {
+    func fetchData(
+        username: String,
+        page: Int,
+        getAll: Bool,
+        onCompletion: @escaping ((Swift.Result<[UserDTO], Error>) -> Void)
+    )
 }
 
-struct ApiManager {
-    
-    var delegate: ApiManagerDelegate?
-    
+struct NEWApiManager: ApiManagerInterface {
+
     let apiURL = "https://api.github.com/users/"
     let searchParameters = "/followers?per_page=100"
-    
-    func fetchData(username: String, page: Int = 0, getAll: Bool = false) {
+
+    func fetchData(
+        username: String,
+        page: Int,
+        getAll: Bool,
+        onCompletion: @escaping ((Swift.Result<[UserDTO], Error>) -> Void)
+    ) {
         let urlString = apiURL + username + searchParameters + "&page=\(page)"
-        performRequest(with: urlString, getAll: getAll)
+        performRequest(with: urlString) { result in
+            onCompletion(result)
+        }
     }
-    
-    func performRequest(with urlString: String, getAll: Bool = false) {
+
+    private func performRequest(
+        with urlString: String,
+        getAll: Bool = false,
+        onCompletion: @escaping ((Swift.Result<[UserDTO], Error>) -> Void)
+    ) {
         if let url = URL(string: urlString) {
             let session = URLSession(configuration: .default)
             let task = session.dataTask(with: url) { data, response, error in
-                if error != nil {
-//                    fatalError()
-                }
+
                 if let data = data {
                     do {
-                        let decodedData = try JSONDecoder().decode([Result].self, from: data)
+                            let decodedData = try JSONDecoder().decode([UserDTO].self, from: data)
                         if getAll {
-                            delegate?.didReceiveResultOfMany(result: decodedData)
+                            onCompletion(.success(decodedData))
                         } else {
-                            delegate?.didReceiveResult(result: decodedData)
+                            onCompletion(.success(decodedData))
                         }
                     } catch {
-                        delegate?.didFailWithError(error: error)
+                        onCompletion(.failure(error))
                     }
                 }
             }
@@ -50,9 +109,8 @@ struct ApiManager {
     }
 }
 
-struct Result: Codable {
+struct UserDTO: Codable {
     let login: String
     let avatar_url: String
     let html_url: String
 }
-

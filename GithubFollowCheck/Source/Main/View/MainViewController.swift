@@ -9,8 +9,10 @@ import UIKit
 
 class MainViewController: UIViewController {
     
-    private var didTapSearchButton: ((String?) -> Void)?
-    private var didTapFavoritesButton: (() -> Void)?
+//    private var didTapSearchButton: ((String?) -> Void)?
+//    private var didTapFavoritesButton: (() -> Void)?
+    
+    private let viewModel: MainViewViewModel
     
     private lazy var textField: UITextField = {
         let textField = UITextField()
@@ -47,10 +49,17 @@ class MainViewController: UIViewController {
         return button
     }()
     
-    init(didTapSearchButton: ((String?) -> Void)?, didTapFavoritesButton: (() -> Void)?) {
+//    init(didTapSearchButton: ((String?) -> Void)?, didTapFavoritesButton: (() -> Void)?) {
+//        super.init(nibName: nil, bundle: nil)
+//        self.didTapSearchButton = didTapSearchButton
+//        self.didTapFavoritesButton = didTapFavoritesButton
+//    }
+    
+    init(
+        viewModel: MainViewViewModel
+    ) {
+        self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
-        self.didTapSearchButton = didTapSearchButton
-        self.didTapFavoritesButton = didTapFavoritesButton
     }
     
     required init?(coder: NSCoder) {
@@ -61,6 +70,10 @@ class MainViewController: UIViewController {
         super.viewDidLoad()
         setUpViews()
         setUpConstraints()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        textField.text = nil
     }
     
     private func setUpViews() {
@@ -93,16 +106,15 @@ class MainViewController: UIViewController {
         ])
     }
     
-    override func viewWillAppear(_ animated: Bool) {
-        textField.text = nil
-    }
-    
     @objc private func searchButtonPressed() {
-        if textField.text == "" { return }
-        didTapSearchButton?(textField.text)
+//        if textField.text == "" { return }
+//        didTapSearchButton?(textField.text)
+        viewModel.onTapSearch(text: textField.text)
+        
     }
     
     @objc private func favoritesButtonPressed() {
-        didTapFavoritesButton?()
+//        didTapFavoritesButton?()
+        viewModel.onTapFavorites()
     }
 }

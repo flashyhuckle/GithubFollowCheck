@@ -17,7 +17,7 @@ final class MainCoordinator: CoordinatorType {
     private var navigationViewController: UINavigationController = UINavigationController()
     private var screens: MainScreens = MainScreens()
     private let presenter: UIWindow
-    private let apiManager: ApiManager
+//    private let apiManager: ApiManager
     
     //MARK: Child coordinators
     
@@ -26,9 +26,9 @@ final class MainCoordinator: CoordinatorType {
     
     //MARK: Initialization
     
-    init(presenter: UIWindow, apiManager: ApiManager) {
+    init(presenter: UIWindow) {
         self.presenter = presenter
-        self.apiManager = apiManager
+//        self.apiManager = apiManager
     }
     
     //MARK: Start
@@ -36,10 +36,10 @@ final class MainCoordinator: CoordinatorType {
     func start() {
         let mainViewController = screens.createMainViewController { [weak self] queryText in
             guard let self = self else { return }
-            self.listCoordinator = ListCoordinator(presenter: self.navigationViewController, searchedUser: queryText, apiManager: self.apiManager)
+            self.listCoordinator = ListCoordinator(presenter: self.navigationViewController, searchedUser: queryText)
             self.listCoordinator?.start()
         } didTapFavoritesButton: {
-            self.favoritesCoordinator = FavoritesCoordinator(presenter: self.navigationViewController, apiManager: self.apiManager)
+            self.favoritesCoordinator = FavoritesCoordinator(presenter: self.navigationViewController)
             self.favoritesCoordinator?.start()
         }
         

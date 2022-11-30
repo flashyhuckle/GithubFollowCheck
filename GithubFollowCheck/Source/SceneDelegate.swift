@@ -20,8 +20,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         
         guard let window = window else { return }
         
-        let apiManager: ApiManager = ApiManager()
-        self.mainCoordinator = MainCoordinator(presenter: window, apiManager: apiManager)
+//        let apiManager: ApiManager = ApiManager()
+        self.mainCoordinator = MainCoordinator(presenter: window)
         mainCoordinator?.start()
         
     }

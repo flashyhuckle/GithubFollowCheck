@@ -8,7 +8,17 @@
 import UIKit
 
 struct ListScreens {
-    func createListViewController(apiManager: ApiManager, searchedUser: String?, didTapTableViewCell: ((Result?) -> Void)?) -> ListViewController {
-        ListViewController(apiManager: apiManager, searchedUser: searchedUser, didTapTableViewCell: didTapTableViewCell)
+    func createListViewController(searchedUser: String?, didTapTableViewCell: ((UserDTO?) -> Void)?) -> ListViewController {
+        let NEWapiManager: ApiManagerInterface = NEWApiManager()
+        let viewModel: ListViewModel = ListViewModel(
+            searchedUser: searchedUser,
+            apiManager: NEWapiManager,
+            didTapTableViewCell: didTapTableViewCell
+        )
+        return ListViewController(
+            viewModel: viewModel,
+//            apiManager: apiManager,
+            searchedUser: searchedUser
+        )
     }
 }

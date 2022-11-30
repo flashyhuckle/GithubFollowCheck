@@ -9,7 +9,7 @@ import UIKit
 
 class DetailViewController: UIViewController {
     
-    private var user: Result?
+    private var user: UserDTO?
     
     private lazy var imageView: UIImageView = {
         let imageView = UIImageView()
@@ -28,7 +28,7 @@ class DetailViewController: UIViewController {
         return label
     }()
     
-    init(user: Result) {
+    init(user: UserDTO) {
         super.init(nibName: nil, bundle: nil)
         self.user = user
     }

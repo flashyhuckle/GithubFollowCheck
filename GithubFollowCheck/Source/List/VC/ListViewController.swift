@@ -9,17 +9,27 @@ import UIKit
 
 class ListViewController: UIViewController {
     
+    //MARK: - Properties
     private let defaults = UserDefaults.standard
     private var favoriteUsers = [String]()
+    private var filteredArray = [UserDTO]()
     
-    private var results = [Result]() {
+    private var results = [UserDTO]() {
         didSet {
             filteredArray = results
+            DispatchQueue.main.async {
+                self.tableView.reloadData()
+            }
         }
     }
     
-    private var filteredArray = [Result]()
     private var page = 1
+    
+    //MARK: - ViewModel
+    
+    private let viewModel: ListViewModel
+    
+    //MARK: - Views
     
     let searchBar: UISearchBar = {
         let searchBar = UISearchBar()
@@ -31,33 +41,60 @@ class ListViewController: UIViewController {
         return searchBar
     }()
     
-    private var topViewConstraint: NSLayoutConstraint?
-    private var topSearchBarConstraint: NSLayoutConstraint?
     private var searchBarHeightConstraint: NSLayoutConstraint?
     private var currentContentOffsetY: Double = 0
     
     private lazy var tableView: UITableView = {
         let table = UITableView()
         table.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
-        table.register(ListViewSearchBarCell.self, forCellReuseIdentifier: "SearchBarCell")
+//        table.register(ListViewSearchBarCell.self, forCellReuseIdentifier: "SearchBarCell")
         table.translatesAutoresizingMaskIntoConstraints = false
         table.keyboardDismissMode = .onDrag
         return table
     }()
     
-    private lazy var favoritesBarButtonON = UIBarButtonItem(image: UIImage(systemName: "star"), style: .plain, target: self, action: #selector(favoritesPressed))
-    private lazy var favoritesBarButtonOFF = UIBarButtonItem(image: UIImage(systemName: "star.fill"), style: .plain, target: self, action: #selector(favoritesPressed))
-    private lazy var searchAllButton = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(searchAll))
+    private lazy var favoritesBarButtonON = UIBarButtonItem(
+        image: UIImage(systemName: "star"),
+        style: .plain, target: self,
+        action: #selector(favoritesPressed)
     
-    private var apiManager = ApiManager()
+    )
+    
+    private lazy var favoritesBarButtonOFF = UIBarButtonItem(
+        image: UIImage(systemName: "star.fill"),
+        style: .plain, target: self,
+        action: #selector(favoritesPressed)
+    
+    )
+    
+    private lazy var searchAllButton = UIBarButtonItem(
+        barButtonSystemItem: .add,
+        target: self,
+        action: #selector(searchAll)
+    )
+    
+//    private var apiManager = ApiManager()
     private let searchedUser: String?
-    private var didTapTableViewCell: ((Result?) -> Void)?
+    private var didTapTableViewCell: ((UserDTO?) -> Void)?
     
-    init(apiManager: ApiManager, searchedUser: String?, didTapTableViewCell: ((Result?) -> Void)?) {
-        self.apiManager = apiManager
+    //MARK: - Initialization
+    
+//    init(apiManager: ApiManager, searchedUser: String?, didTapTableViewCell: ((ChujowyResult?) -> Void)?) {
+//        self.apiManager = apiManager
+//        self.searchedUser = searchedUser
+//        self.didTapTableViewCell = didTapTableViewCell
+//
+//        super.init(nibName: nil, bundle: nil)
+//    }
+    
+    init(
+        viewModel: ListViewModel,
+//        apiManager: ApiManager,
+        searchedUser: String?
+    ) {
+        self.viewModel = viewModel
+//        self.apiManager = apiManager
         self.searchedUser = searchedUser
-        self.didTapTableViewCell = didTapTableViewCell
-        
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -65,18 +102,28 @@ class ListViewController: UIViewController {
         fatalError()
     }
     
+    //MARK: - Lifecycle
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setUpViews()
         setUpConstraints()
+        
+        updateFavoriteUsers()
         handlingUser()
+        setupNavigationItems()
+        
+        viewModel.didReceiveUsers = { [ weak self ] users in
+            self?.results += users
+        }
     }
+
     
     private func setUpViews() {
         title = searchedUser
         view.backgroundColor = .red
         
-        apiManager.delegate = self
+//        apiManager.delegate = self
         
         tableView.delegate = self
         tableView.dataSource = self
@@ -103,33 +150,34 @@ class ListViewController: UIViewController {
         ])
     }
     
-    private func updateLayout(
-        isSearchBarVisible: Bool
-    ) {
-        switch isSearchBarVisible {
-        case true:
-            topViewConstraint?.isActive = false
-            topSearchBarConstraint?.isActive = true
-            searchBar.isHidden = false
-        case false:
-            topSearchBarConstraint?.isActive = false
-            topViewConstraint?.isActive = true
-            searchBar.isHidden = true
-        }
-
-        view.updateConstraintsIfNeeded()
-    }
     
+    private func updateFavoriteUsers() {
+        favoriteUsers = viewModel.getFavoriteUsers(forKey: "favoriteUsers")
+//        guard let favoriteUsers = defaults.array(forKey: "favoriteUsers") as? [String] else { return }
+//        self.favoriteUsers = favoriteUsers
+    }
+
     private func handlingUser() {
-        if let fav = defaults.array(forKey: "favoriteUsers") as? [String] {
-            favoriteUsers = fav
-        }
+//        if let fav = defaults.array(forKey: "favoriteUsers") as? [String] {
+//            favoriteUsers = fav
+//        }
         guard let searchedUser = searchedUser else { return }
-        apiManager.fetchData(username: searchedUser)
-        
-        if favoriteUsers.contains(searchedUser) {
+//        apiManager.fetchData(username: searchedUser)
+        viewModel.getUser()
+//
+//        if favoriteUsers.contains(searchedUser) {
+//            navigationItem.rightBarButtonItems = [searchAllButton, favoritesBarButtonOFF]
+//        } else {
+//            navigationItem.rightBarButtonItems = [searchAllButton, favoritesBarButtonON]
+//        }
+    }
+
+    private func setupNavigationItems() {
+        guard let searchedUser = searchedUser else { return }
+        switch favoriteUsers.contains(searchedUser) {
+        case true:
             navigationItem.rightBarButtonItems = [searchAllButton, favoritesBarButtonOFF]
-        } else {
+        case false:
             navigationItem.rightBarButtonItems = [searchAllButton, favoritesBarButtonON]
         }
     }
@@ -149,9 +197,9 @@ class ListViewController: UIViewController {
     }
     
     @objc private func searchAll() {
-        page += 1
-        guard let searchedUser = searchedUser else { return }
-        apiManager.fetchData(username: searchedUser, page: page, getAll: true)
+//        page += 1
+//        guard let searchedUser = searchedUser else { return }
+//        apiManager.fetchData(username: searchedUser, page: page, getAll: true)
     }
 }
 
@@ -172,7 +220,8 @@ extension ListViewController: UITableViewDelegate, UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        didTapTableViewCell?(filteredArray[indexPath.row])
+//        didTapTableViewCell?(filteredArray[indexPath.row])
+        viewModel.onTapTableViewCell(user: filteredArray[indexPath.row])
         tableView.deselectRow(at: indexPath, animated: true)
     }
     
@@ -180,8 +229,9 @@ extension ListViewController: UITableViewDelegate, UITableViewDataSource {
         let lastItem = results.count
         if indexPath.row == lastItem - 1 {
             page += 1
-            guard let searchedUser = searchedUser else { return }
-            apiManager.fetchData(username: searchedUser, page: page)
+//            guard let searchedUser = searchedUser else { return }
+//            apiManager.fetchData(username: searchedUser, page: page)
+            viewModel.getUser(page: page)
         }
     }
 
@@ -193,7 +243,7 @@ extension ListViewController: UITableViewDelegate, UITableViewDataSource {
         
         guard scrollView.contentOffset.y > 0 else { return }
 
-        print("current: \(currentContentOffsetY) || SV: \(scrollView.contentOffset.y)")
+//        print("current: \(currentContentOffsetY) || SV: \(scrollView.contentOffset.y)")
 
         if currentContentOffsetY > scrollView.contentOffset.y {
             // W GÓRĘ
@@ -231,35 +281,35 @@ extension ListViewController: UITableViewDelegate, UITableViewDataSource {
 
 //MARK: API Delegate
 
-extension ListViewController: ApiManagerDelegate {
-    
-    func didReceiveResult(result: [Result]) {
-        results += result
-        print("you have \(results.count) results")
-        DispatchQueue.main.async {
-            self.tableView.reloadData()
-        }
-    }
-    
-    func didReceiveResultOfMany(result: [Result]) {
-        if result.isEmpty {
-            print("you have \(results.count) results")
-            DispatchQueue.main.async {
-                self.tableView.reloadData()
-            }
-        } else {
-            results += result
-            page += 1
-            guard let searchedUser = searchedUser else { return }
-            apiManager.fetchData(username: searchedUser, page: page, getAll: true)
-            print("\(results.count) results and counting...")
-        }
-    }
-    
-    func didFailWithError(error: Error) {
-        print(error)
-    }
-}
+//extension ListViewController: ApiManagerDelegate {
+//
+//    func didReceiveResult(result: [ChujowyResult]) {
+//        results += result
+//        print("you have \(results.count) results")
+//        DispatchQueue.main.async {
+//            self.tableView.reloadData()
+//        }
+//    }
+//
+//    func didReceiveResultOfMany(result: [ChujowyResult]) {
+//        if result.isEmpty {
+//            print("you have \(results.count) results")
+//            DispatchQueue.main.async {
+//                self.tableView.reloadData()
+//            }
+//        } else {
+//            results += result
+//            page += 1
+//            guard let searchedUser = searchedUser else { return }
+//            apiManager.fetchData(username: searchedUser, page: page, getAll: true)
+//            print("\(results.count) results and counting...")
+//        }
+//    }
+//
+//    func didFailWithError(error: Error) {
+//        print(error)
+//    }
+//}
 
 //MARK: Searchbar Delegate
 
