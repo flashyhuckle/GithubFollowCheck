@@ -1,14 +1,12 @@
-//
-//  DetailScreens.swift
-//  GithubFollowCheck
-//
-//  Created by Marcin Głodzik on 08/11/2022.
-//
-
 import UIKit
 
 struct DetailScreens {
     func createDetailViewController(user: UserDTO) -> DetailViewController {
-        DetailViewController(user: user)
+        let apiManager: ApiManagerInterface = NEWApiManager()
+        let viewModel = DetailViewModel(
+            user: user,
+            apiManager: apiManager
+        )
+        return DetailViewController(viewModel: viewModel)
     }
 }

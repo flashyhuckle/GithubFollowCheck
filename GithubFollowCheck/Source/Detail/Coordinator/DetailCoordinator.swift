@@ -1,10 +1,3 @@
-//
-//  DetailCoordinator.swift
-//  GithubFollowCheck
-//
-//  Created by Marcin Głodzik on 08/11/2022.
-//
-
 import UIKit
 
 final class DetailCoordinator: CoordinatorType {

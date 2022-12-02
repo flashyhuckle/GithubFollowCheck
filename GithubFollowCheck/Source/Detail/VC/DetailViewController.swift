@@ -1,16 +1,11 @@
-//
-//  DetailViewController.swift
-//  GithubFollowCheck
-//
-//  Created by Marcin Głodzik on 20/10/2022.
-//
-
 import UIKit
 
 class DetailViewController: UIViewController {
     
-    private var user: UserDTO?
+    //MARK: - ViewModel
+    private var viewModel: DetailViewModel
     
+    //MARK: - Views
     private lazy var imageView: UIImageView = {
         let imageView = UIImageView()
         imageView.layer.cornerRadius = imageView.frame.height/2
@@ -23,20 +18,24 @@ class DetailViewController: UIViewController {
         let label = UILabel()
         label.textColor = .white
         label.textAlignment = .center
-        label.text = user?.login
+        label.text = viewModel.user.login
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
     
-    init(user: UserDTO) {
+    //MARK: - Initialization
+    init(
+        viewModel: DetailViewModel
+    ) {
+        self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
-        self.user = user
     }
     
     required init?(coder: NSCoder) {
         fatalError()
     }
     
+    //MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
         setUpLayout()
@@ -48,8 +47,12 @@ class DetailViewController: UIViewController {
         view.addSubview(imageView)
         view.addSubview(label)
         
-        if let url = URL(string: user!.avatar_url) {
-            downloadImage(from: url)
+        viewModel.getUserAvatar()
+        
+        viewModel.didReceiveAvatar = { [ weak self ] avatar in
+            DispatchQueue.main.async() {
+                self?.imageView.image = avatar
+            }
         }
     }
     
@@ -68,18 +71,5 @@ class DetailViewController: UIViewController {
             label.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             label.topAnchor.constraint(equalTo: imageView.bottomAnchor, constant: spacing)
         ])
-    }
-    
-    private func downloadImage(from url: URL) {
-        getData(from: url) { data, response, error in
-            guard let data = data, error == nil else { return }
-            DispatchQueue.main.async() { [weak self] in
-                self?.imageView.image = UIImage(data: data)
-            }
-        }
-    }
-    
-    private func getData(from url: URL, completion: @escaping (Data?, URLResponse?, Error?) -> ()) {
-        URLSession.shared.dataTask(with: url, completionHandler: completion).resume()
     }
 }

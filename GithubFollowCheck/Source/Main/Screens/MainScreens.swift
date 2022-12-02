@@ -1,10 +1,3 @@
-//
-//  MainScreens.swift
-//  GithubFollowCheck
-//
-//  Created by Marcin Głodzik on 02/11/2022.
-//
-
 import UIKit
 
 struct MainScreens {

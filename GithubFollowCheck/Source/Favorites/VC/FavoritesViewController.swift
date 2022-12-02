@@ -1,19 +1,15 @@
-//
-//  FavoritesViewController.swift
-//  GithubFollowCheck
-//
-//  Created by Marcin Głodzik on 25/10/2022.
-//
-
 import UIKit
 
 final class FavoritesViewController: UIViewController {
     
-    private var didTapTableViewCell: ((String?) -> Void)?
+    //MARK: - Properties
     private let defaults = UserDefaults.standard
-    
     private var favoriteUsers = [String]()
     
+    //MARK: - ViewModel
+    private let viewModel: FavoritesViewModel
+    
+    //MARK: - Views
     private lazy var tableView: UITableView = {
         let table = UITableView()
         table.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
@@ -21,19 +17,31 @@ final class FavoritesViewController: UIViewController {
         return table
     }()
     
-    init(didTapTableViewCell: ((String?) -> Void)?) {
+    //MARK: - Initialization
+    init(
+        viewModel: FavoritesViewModel
+    ) {
+        self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
-        self.didTapTableViewCell = didTapTableViewCell
     }
     
     required init?(coder: NSCoder) {
         fatalError()
     }
     
+    //MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
         setUpViews()
         setUpConstraints()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(false)
+        if let fav = defaults.array(forKey: "favoriteUsers") as? [String] {
+            favoriteUsers = fav
+            tableView.reloadData()
+        }
     }
     
     private func setUpViews() {
@@ -51,14 +59,6 @@ final class FavoritesViewController: UIViewController {
             tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
-    }
-    
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(false)
-        if let fav = defaults.array(forKey: "favoriteUsers") as? [String] {
-            favoriteUsers = fav
-            tableView.reloadData()
-        }
     }
 }
 
@@ -79,7 +79,7 @@ extension FavoritesViewController: UITableViewDataSource, UITableViewDelegate {
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        //TODO: Connect coordinator
-        didTapTableViewCell?(favoriteUsers[indexPath.row])
+//        didTapTableViewCell?(favoriteUsers[indexPath.row])
+        viewModel.onTapTableViewCell(user: favoriteUsers[indexPath.row])
     }
 }

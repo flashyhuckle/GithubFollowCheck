@@ -1,10 +1,3 @@
-//
-//  AppDelegate.swift
-//  GithubFollowCheck
-//
-//  Created by Marcin Głodzik on 20/10/2022.
-//
-
 import UIKit
 
 @main

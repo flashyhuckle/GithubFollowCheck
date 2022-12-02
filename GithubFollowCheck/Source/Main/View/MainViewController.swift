@@ -1,19 +1,11 @@
-//
-//  MainViewController.swift
-//  GithubFollowCheck
-//
-//  Created by Marcin Głodzik on 20/10/2022.
-//
-
 import UIKit
 
 class MainViewController: UIViewController {
     
-//    private var didTapSearchButton: ((String?) -> Void)?
-//    private var didTapFavoritesButton: (() -> Void)?
-    
+    //MARK: - ViewModel
     private let viewModel: MainViewViewModel
     
+    //MARK: - Views
     private lazy var textField: UITextField = {
         let textField = UITextField()
         textField.layer.borderWidth = 5
@@ -49,12 +41,7 @@ class MainViewController: UIViewController {
         return button
     }()
     
-//    init(didTapSearchButton: ((String?) -> Void)?, didTapFavoritesButton: (() -> Void)?) {
-//        super.init(nibName: nil, bundle: nil)
-//        self.didTapSearchButton = didTapSearchButton
-//        self.didTapFavoritesButton = didTapFavoritesButton
-//    }
-    
+    //MARK: - Initialization/
     init(
         viewModel: MainViewViewModel
     ) {
@@ -66,6 +53,7 @@ class MainViewController: UIViewController {
         fatalError()
     }
     
+    //MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
         setUpViews()
@@ -107,14 +95,11 @@ class MainViewController: UIViewController {
     }
     
     @objc private func searchButtonPressed() {
-//        if textField.text == "" { return }
-//        didTapSearchButton?(textField.text)
         viewModel.onTapSearch(text: textField.text)
         
     }
     
     @objc private func favoritesButtonPressed() {
-//        didTapFavoritesButton?()
         viewModel.onTapFavorites()
     }
 }

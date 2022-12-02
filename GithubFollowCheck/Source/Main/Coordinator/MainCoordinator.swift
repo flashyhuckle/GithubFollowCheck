@@ -1,10 +1,3 @@
-//
-//  MainCoordinator.swift
-//  GithubFollowCheck
-//
-//  Created by Marcin Głodzik on 02/11/2022.
-//
-
 import UIKit
 
 protocol CoordinatorType {
@@ -17,7 +10,6 @@ final class MainCoordinator: CoordinatorType {
     private var navigationViewController: UINavigationController = UINavigationController()
     private var screens: MainScreens = MainScreens()
     private let presenter: UIWindow
-//    private let apiManager: ApiManager
     
     //MARK: Child coordinators
     
@@ -28,7 +20,6 @@ final class MainCoordinator: CoordinatorType {
     
     init(presenter: UIWindow) {
         self.presenter = presenter
-//        self.apiManager = apiManager
     }
     
     //MARK: Start

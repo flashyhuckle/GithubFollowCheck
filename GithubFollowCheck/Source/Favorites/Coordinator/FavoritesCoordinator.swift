@@ -1,10 +1,3 @@
-//
-//  FavoritesCoordinator.swift
-//  GithubFollowCheck
-//
-//  Created by Marcin Głodzik on 08/11/2022.
-//
-
 import UIKit
 
 final class FavoritesCoordinator: CoordinatorType {
@@ -13,7 +6,6 @@ final class FavoritesCoordinator: CoordinatorType {
     
     private let screens: FavoritesScreens = FavoritesScreens()
     private let presenter: UINavigationController
-//    private let apiManager: ApiManager
     
     //MARK: Child coordinators
     
@@ -23,7 +15,6 @@ final class FavoritesCoordinator: CoordinatorType {
     
     init(presenter: UINavigationController) {
         self.presenter = presenter
-//        self.apiManager = apiManager
     }
     
     //MARK: Start
@@ -31,7 +22,7 @@ final class FavoritesCoordinator: CoordinatorType {
     func start() {
         let favoritesViewController = screens.createFavoritesViewController { [weak self] queryText in
             guard let self = self else { return }
-            self.listCoordinator = ListCoordinator(presenter: self.presenter, searchedUser: queryText)
+            self.listCoordinator = ListCoordinator(presenter: self.presenter, searchedUser: queryText!)
             self.listCoordinator?.start()
         }
         presenter.pushViewController(favoritesViewController, animated: true)

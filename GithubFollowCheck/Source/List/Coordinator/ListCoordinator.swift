@@ -1,10 +1,3 @@
-//
-//  ListCoordinator.swift
-//  GithubFollowCheck
-//
-//  Created by Marcin Głodzik on 08/11/2022.
-//
-
 import UIKit
 
 final class ListCoordinator: CoordinatorType {
@@ -13,8 +6,7 @@ final class ListCoordinator: CoordinatorType {
     
     private let screens: ListScreens = ListScreens()
     private let presenter: UINavigationController
-    private let searchedUser: String?
-//    private let apiManager: ApiManager
+    private let searchedUser: String
     
     //MARK: Child coordinators
     
@@ -22,10 +14,9 @@ final class ListCoordinator: CoordinatorType {
     
     //MARK: Initialization
     
-    init(presenter: UINavigationController, searchedUser: String?) {
+    init(presenter: UINavigationController, searchedUser: String) {
         self.presenter = presenter
         self.searchedUser = searchedUser
-//        self.apiManager = apiManager
     }
     
     //MARK: Start

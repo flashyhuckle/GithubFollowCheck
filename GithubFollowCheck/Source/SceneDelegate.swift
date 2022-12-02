@@ -1,10 +1,3 @@
-//
-//  SceneDelegate.swift
-//  GithubFollowCheck
-//
-//  Created by Marcin Głodzik on 20/10/2022.
-//
-
 import UIKit
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
@@ -20,7 +13,6 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         
         guard let window = window else { return }
         
-//        let apiManager: ApiManager = ApiManager()
         self.mainCoordinator = MainCoordinator(presenter: window)
         mainCoordinator?.start()
         

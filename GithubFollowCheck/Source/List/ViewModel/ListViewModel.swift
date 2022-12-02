@@ -6,7 +6,7 @@ final class ListViewModel {
 
     private let userDefaults: UserDefaults = .standard
 
-    private let searchedUser: String?
+    let searchedUser: String
     private let apiManager: ApiManagerInterface
     private let didTapTableViewCell: ((UserDTO?) -> Void)?
 
@@ -17,7 +17,7 @@ final class ListViewModel {
     // MARK: - Initialization
 
     init(
-        searchedUser: String?,
+        searchedUser: String,
         apiManager: ApiManagerInterface,
         didTapTableViewCell: ((UserDTO?) -> Void)?
     ) {
@@ -33,18 +33,17 @@ final class ListViewModel {
         return favoriteUsers
     }
 
-    func viewDidLoad() {
-        getUser()
-    }
+//    func viewDidLoad() {
+//        getUser()
+//    }
 
     func getUser(
         page: Int = 1
     )  {
-        guard let searchedUser = searchedUser else { return }
+//        guard let searchedUser = searchedUser else { return }
         apiManager.fetchData(
             username: searchedUser,
-            page: page,
-            getAll: false
+            page: page
         ) { [weak self] result in
             switch result {
             case .success(let users):
