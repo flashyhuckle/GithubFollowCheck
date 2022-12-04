@@ -1,60 +1,72 @@
 import Foundation
 
 final class ListViewModel {
- 
+    
     // MARK: - Input
-
+    
     private let userDefaults: UserDefaults = .standard
-
     let searchedUser: String
     private let apiManager: ApiManagerInterface
-    private let didTapTableViewCell: ((UserDTO?) -> Void)?
-
+    private let didTapTableViewCell: ((User) -> Void)?
+    private var currentPage = 1
+    
     // MARK: - Output
-
-    var didReceiveUsers: (([UserDTO]) -> Void)?
-
+    
+    var didReceiveUsers: (([User]) -> Void)?
+    var didReceiveFavoriteUsers: (([String]) -> Void)?
+    
     // MARK: - Initialization
-
+    
     init(
         searchedUser: String,
         apiManager: ApiManagerInterface,
-        didTapTableViewCell: ((UserDTO?) -> Void)?
+        didTapTableViewCell: ((User) -> Void)?
     ) {
         self.searchedUser = searchedUser
         self.apiManager = apiManager
         self.didTapTableViewCell = didTapTableViewCell
     }
-
-    func getFavoriteUsers(
-        forKey: String
-    ) -> [String] {
-        guard let favoriteUsers = userDefaults.array(forKey: forKey) as? [String] else { return [] }
-        return favoriteUsers
+    
+    func viewDidLoad() {
+        getFavoriteUsers()
+        getUsers()
+    }
+    
+    private func getFavoriteUsers() {
+        guard let favoriteUsers = userDefaults.array(forKey: "favoriteUsers") as? [String] else { return }
+        didReceiveFavoriteUsers?(favoriteUsers)
+    }
+    
+    func updateFavoriteUsers(
+        favoriteUsers: [String]
+    ) {
+        userDefaults.set(favoriteUsers, forKey: "favoriteUsers")
     }
 
-//    func viewDidLoad() {
-//        getUser()
-//    }
+    func getNextPageUsers() {
+        currentPage += 1
+        getUsers(for: currentPage)
+    }
 
-    func getUser(
-        page: Int = 1
+    private func getUsers(
+        for page: Int = 1
     )  {
-//        guard let searchedUser = searchedUser else { return }
         apiManager.fetchData(
             username: searchedUser,
             page: page
         ) { [weak self] result in
             switch result {
             case .success(let users):
-                self?.didReceiveUsers?(users)
+                guard let self else { return }
+                self.didReceiveUsers?(users)
+
             case .failure(let error):
                 print("ERROR: \(error)")
             }
         }
     }
 
-    func onTapTableViewCell(user: UserDTO?) {
+    func onTapTableViewCell(user: User) {
         didTapTableViewCell?(user)
     }
 }

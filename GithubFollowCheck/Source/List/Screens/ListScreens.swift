@@ -1,8 +1,8 @@
 import UIKit
 
 struct ListScreens {
-    func createListViewController(searchedUser: String, didTapTableViewCell: ((UserDTO?) -> Void)?) -> ListViewController {
-        let apiManager: ApiManagerInterface = NEWApiManager()
+    func createListViewController(searchedUser: String, didTapTableViewCell: ((User) -> Void)?) -> ListViewController {
+        let apiManager: ApiManagerInterface = ApiManager()
         let viewModel: ListViewModel = ListViewModel(
             searchedUser: searchedUser,
             apiManager: apiManager,

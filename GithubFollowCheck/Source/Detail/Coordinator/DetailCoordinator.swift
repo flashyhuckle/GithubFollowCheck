@@ -5,11 +5,11 @@ final class DetailCoordinator: CoordinatorType {
     
     private let screens: DetailScreens = DetailScreens()
     private let presenter: UINavigationController
-    private let user: UserDTO
+    private let user: User
     
     //MARK: Initialization
     
-    init(presenter: UINavigationController, user: UserDTO) {
+    init(presenter: UINavigationController, user: User) {
         self.presenter = presenter
         self.user = user
     }

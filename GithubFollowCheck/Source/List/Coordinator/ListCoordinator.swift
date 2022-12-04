@@ -22,9 +22,9 @@ final class ListCoordinator: CoordinatorType {
     //MARK: Start
     
     func start() {
-        let listViewController = screens.createListViewController(searchedUser: searchedUser) { [weak self] result in
+        let listViewController = screens.createListViewController(searchedUser: searchedUser) { [weak self] user in
             guard let self = self else { return }
-            self.detailCoordinagor = DetailCoordinator(presenter: self.presenter, user: result!)
+            self.detailCoordinagor = DetailCoordinator(presenter: self.presenter, user: user)
             self.detailCoordinagor?.start()
         }
         presenter.pushViewController(listViewController, animated: true)

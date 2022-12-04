@@ -1,8 +1,8 @@
 import UIKit
 
 struct DetailScreens {
-    func createDetailViewController(user: UserDTO) -> DetailViewController {
-        let apiManager: ApiManagerInterface = NEWApiManager()
+    func createDetailViewController(user: User) -> DetailViewController {
+        let apiManager: ApiManagerInterface = ApiManager()
         let viewModel = DetailViewModel(
             user: user,
             apiManager: apiManager

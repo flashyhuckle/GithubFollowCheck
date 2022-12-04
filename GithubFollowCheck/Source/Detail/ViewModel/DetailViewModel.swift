@@ -5,7 +5,7 @@ final class DetailViewModel {
     
     //MARK: - Input
     
-    let user: UserDTO
+    let user: User
     private let apiManager: ApiManagerInterface
     
     //MARK: - Output
@@ -15,7 +15,7 @@ final class DetailViewModel {
     //MARK: - Initialization
     
     init(
-        user: UserDTO,
+        user: User,
         apiManager: ApiManagerInterface
     ) {
         self.user = user
@@ -23,7 +23,7 @@ final class DetailViewModel {
     }
     
     func getUserAvatar() {
-        apiManager.getUserAvatar(urlString: user.avatar_url) { result in
+        apiManager.getUserAvatar(urlString: user.avatarURL) { result in
             switch result {
             case .success(let avatar):
                 self.didReceiveAvatar?(avatar)

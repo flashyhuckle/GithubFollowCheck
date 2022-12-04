@@ -5,7 +5,7 @@ protocol ApiManagerInterface {
     func fetchData(
         username: String,
         page: Int,
-        onCompletion: @escaping ((Swift.Result<[UserDTO], Error>) -> Void)
+        onCompletion: @escaping ((Swift.Result<[User], Error>) -> Void)
     )
     func getUserAvatar(
         urlString: String,
@@ -13,7 +13,7 @@ protocol ApiManagerInterface {
     )
 }
 
-struct NEWApiManager: ApiManagerInterface {
+struct ApiManager: ApiManagerInterface {
 
     let apiURL = "https://api.github.com/users/"
     let searchParameters = "/followers?per_page=100"
@@ -21,7 +21,7 @@ struct NEWApiManager: ApiManagerInterface {
     func fetchData(
         username: String,
         page: Int,
-        onCompletion: @escaping ((Swift.Result<[UserDTO], Error>) -> Void)
+        onCompletion: @escaping ((Swift.Result<[User], Error>) -> Void)
     ) {
         let urlString = apiURL + username + searchParameters + "&page=\(page)"
         performRequest(with: urlString) { result in
@@ -31,7 +31,7 @@ struct NEWApiManager: ApiManagerInterface {
 
     private func performRequest(
         with urlString: String,
-        onCompletion: @escaping ((Swift.Result<[UserDTO], Error>) -> Void)
+        onCompletion: @escaping ((Swift.Result<[User], Error>) -> Void)
     ) {
         if let url = URL(string: urlString) {
             let session = URLSession(configuration: .default)
@@ -39,10 +39,14 @@ struct NEWApiManager: ApiManagerInterface {
 
                 if let data = data {
                     do {
-                            let decodedData = try JSONDecoder().decode([UserDTO].self, from: data)
-                        onCompletion(.success(decodedData))
+                        let decodedData = try JSONDecoder().decode([User].self, from: data)
+                        DispatchQueue.main.async {
+                            onCompletion(.success(decodedData))
+                        }
                     } catch {
-                        onCompletion(.failure(error))
+                        DispatchQueue.main.async {
+                            onCompletion(.failure(error))
+                        }
                     }
                 }
             }
@@ -58,18 +62,16 @@ struct NEWApiManager: ApiManagerInterface {
             let session = URLSession(configuration: .default)
             let task = session.dataTask(with: url) { data, response, error in
                 if let data = data {
-                    onCompletion(.success(UIImage(data: data)!))
+                    DispatchQueue.main.async {
+                        onCompletion(.success(UIImage(data: data)!))
+                    }
                 } else {
-                    onCompletion(.failure(error!))
+                    DispatchQueue.main.async {
+                        onCompletion(.failure(error!))
+                    }
                 }
             }
             task.resume()
         }
     }
-}
-
-struct UserDTO: Codable {
-    let login: String
-    let avatar_url: String
-    let html_url: String
 }

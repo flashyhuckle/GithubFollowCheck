@@ -2,8 +2,9 @@ import UIKit
 
 class ListViewController: UIViewController {
     
+//    let defaults = UserDefaults.standard
+    
     //MARK: - Properties
-    private let defaults = UserDefaults.standard
     private var favoriteUsers = [String]() {
         didSet {
             if favoriteUsers.contains(viewModel.searchedUser) {
@@ -14,19 +15,16 @@ class ListViewController: UIViewController {
         }
     }
     
-    private var filteredArray = [UserDTO]()
+    private var filteredArray = [User]()
     
-    private var results = [UserDTO]() {
+    private var results = [User]() {
         didSet {
             filteredArray = results
-            DispatchQueue.main.async {
-                self.tableView.reloadData()
-            }
+            self.tableView.reloadData()
         }
     }
     
-    private var page = 1
-    private var didTapTableViewCell: ((UserDTO?) -> Void)?
+    private var didTapTableViewCell: ((User) -> Void)?
     
     //MARK: - ViewModel
     private let viewModel: ListViewModel
@@ -78,12 +76,18 @@ class ListViewController: UIViewController {
         setUpViews()
         setUpConstraints()
         
-        updateFavoriteUsers()
-        handlingUser()
         setupNavigationItems()
+        viewModel.viewDidLoad()
+        
+//        favoriteUsers = defaults.array(forKey: "favoriteUsers") as! [String]
         
         viewModel.didReceiveUsers = { [ weak self ] users in
             self?.results += users
+        }
+        
+        viewModel.didReceiveFavoriteUsers = { [ weak self ] favoriteUsers in
+            //CZEMU KURWA NIE DZIAŁA
+            self?.favoriteUsers = favoriteUsers
         }
     }
 
@@ -115,14 +119,6 @@ class ListViewController: UIViewController {
             tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
     }
-    
-    private func updateFavoriteUsers() {
-        favoriteUsers = viewModel.getFavoriteUsers(forKey: "favoriteUsers")
-    }
-
-    private func handlingUser() {
-        viewModel.getUser()
-    }
 
     private func setupNavigationItems() {
         navigationItem.rightBarButtonItem = favoritesBarButton
@@ -132,10 +128,10 @@ class ListViewController: UIViewController {
         if viewModel.searchedUser.isEmpty { return }
         if favoriteUsers.contains(viewModel.searchedUser) {
             favoriteUsers = favoriteUsers.filter { $0 != viewModel.searchedUser}
-            defaults.set(favoriteUsers, forKey: "favoriteUsers")
+            viewModel.updateFavoriteUsers(favoriteUsers: favoriteUsers)
         } else {
             favoriteUsers.append(viewModel.searchedUser)
-            defaults.set(favoriteUsers, forKey: "favoriteUsers")
+            viewModel.updateFavoriteUsers(favoriteUsers: favoriteUsers)
         }
     }
 }
@@ -149,7 +145,7 @@ extension ListViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         if let cell = tableView.dequeueReusableCell(withIdentifier: "cell") {
-            cell.textLabel?.text = filteredArray[indexPath.row].login
+            cell.textLabel?.text = filteredArray[indexPath.row].name
             cell.accessoryType = .disclosureIndicator
             return cell
         }
@@ -164,8 +160,7 @@ extension ListViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
         let lastItem = results.count
         if indexPath.row == lastItem - 1 {
-            page += 1
-            viewModel.getUser(page: page)
+            viewModel.getNextPageUsers()
         }
     }
 
@@ -212,7 +207,7 @@ extension ListViewController: UITableViewDelegate, UITableViewDataSource {
 
 extension ListViewController: UISearchBarDelegate {
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-        filteredArray = results.filter { $0.login.lowercased().contains(searchText.lowercased()) }
+        filteredArray = results.filter { $0.name.lowercased().contains(searchText.lowercased()) }
         if searchText.isEmpty {
             filteredArray = results
         }

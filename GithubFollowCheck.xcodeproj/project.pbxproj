@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		A40B3E58293A88EA0035BE40 /* FavoritesViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A40B3E57293A88EA0035BE40 /* FavoritesViewModel.swift */; };
 		A40B3E5B293A8ECB0035BE40 /* DetailViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A40B3E5A293A8ECB0035BE40 /* DetailViewModel.swift */; };
+		A42FB00F293CBB22005686FF /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = A42FB00E293CBB22005686FF /* User.swift */; };
 		A438E8A12937D41900EA95DD /* MainViewViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A438E8A02937D41900EA95DD /* MainViewViewModelTests.swift */; };
 		A438E8AA2937D4DD00EA95DD /* MainViewViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A438E8A92937D4DD00EA95DD /* MainViewViewModel.swift */; };
 		A438E8AC2937D4F100EA95DD /* ListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A438E8AB2937D4F100EA95DD /* ListViewModel.swift */; };
@@ -51,6 +52,7 @@
 /* Begin PBXFileReference section */
 		A40B3E57293A88EA0035BE40 /* FavoritesViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoritesViewModel.swift; sourceTree = "<group>"; };
 		A40B3E5A293A8ECB0035BE40 /* DetailViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailViewModel.swift; sourceTree = "<group>"; };
+		A42FB00E293CBB22005686FF /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
 		A438E88F2937D3F500EA95DD /* GithubFollowCheckUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GithubFollowCheckUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		A438E89E2937D41800EA95DD /* GithubFollowCheckTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GithubFollowCheckTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		A438E8A02937D41900EA95DD /* MainViewViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewViewModelTests.swift; sourceTree = "<group>"; };
@@ -118,6 +120,14 @@
 			path = ViewModel;
 			sourceTree = "<group>";
 		};
+		A42FB00D293CBB17005686FF /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				A42FB00E293CBB22005686FF /* User.swift */,
+			);
+			path = Model;
+			sourceTree = "<group>";
+		};
 		A438E89F2937D41900EA95DD /* GithubFollowCheckTests */ = {
 			isa = PBXGroup;
 			children = (
@@ -164,6 +174,7 @@
 		A44B2FDD2901C5F9002E1062 /* GithubFollowCheck */ = {
 			isa = PBXGroup;
 			children = (
+				A42FB00D293CBB17005686FF /* Model */,
 				A4D5DC542912FBCD00CD1FBB /* API */,
 				A4D5DC552912FBD800CD1FBB /* Source */,
 				A4D5DC532912FA9800CD1FBB /* Resources */,
@@ -495,6 +506,7 @@
 				A4854DBB291AEAB200AE8C7E /* ListCoordinator.swift in Sources */,
 				A4854DB1291AEA0E00AE8C7E /* FavoritesScreens.swift in Sources */,
 				A40B3E5B293A8ECB0035BE40 /* DetailViewModel.swift in Sources */,
+				A42FB00F293CBB22005686FF /* User.swift in Sources */,
 				A4854DB3291AEA2200AE8C7E /* DetailScreens.swift in Sources */,
 				A4D3484029086B9000011488 /* FavoritesViewController.swift in Sources */,
 				A4D5DC602912FD5A00CD1FBB /* MainScreens.swift in Sources */,

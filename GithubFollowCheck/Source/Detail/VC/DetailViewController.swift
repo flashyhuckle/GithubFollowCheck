@@ -18,7 +18,7 @@ class DetailViewController: UIViewController {
         let label = UILabel()
         label.textColor = .white
         label.textAlignment = .center
-        label.text = viewModel.user.login
+        label.text = viewModel.user.name
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()

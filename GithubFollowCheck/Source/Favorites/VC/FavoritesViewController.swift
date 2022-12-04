@@ -1,10 +1,18 @@
 import UIKit
 
 final class FavoritesViewController: UIViewController {
-    
+
+    //MARK: - Constants
+    private enum Constants {
+        static let title: String = "Favorites"
+    }
+
     //MARK: - Properties
-    private let defaults = UserDefaults.standard
-    private var favoriteUsers = [String]()
+    private var favoriteUsers = [String]() {
+        didSet {
+            tableView.reloadData()
+        }
+    }
     
     //MARK: - ViewModel
     private let viewModel: FavoritesViewModel
@@ -34,18 +42,18 @@ final class FavoritesViewController: UIViewController {
         super.viewDidLoad()
         setUpViews()
         setUpConstraints()
-    }
-    
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(false)
-        if let fav = defaults.array(forKey: "favoriteUsers") as? [String] {
-            favoriteUsers = fav
-            tableView.reloadData()
+        
+        viewModel.didReceiveFavoriteUsers = { [ weak self ] favoriteUsers in
+            self?.favoriteUsers = favoriteUsers
         }
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        viewModel.viewWillAppear()
+    }
+    
     private func setUpViews() {
-        title = "Favorites"
+        title = Constants.title
         view.backgroundColor = .green
         view.addSubview(tableView)
         tableView.dataSource = self
@@ -79,7 +87,6 @@ extension FavoritesViewController: UITableViewDataSource, UITableViewDelegate {
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-//        didTapTableViewCell?(favoriteUsers[indexPath.row])
         viewModel.onTapTableViewCell(user: favoriteUsers[indexPath.row])
     }
 }
