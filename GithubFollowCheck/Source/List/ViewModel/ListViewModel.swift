@@ -28,8 +28,11 @@ final class ListViewModel {
     }
     
     func viewDidLoad() {
-        getFavoriteUsers()
         getUsers()
+    }
+    
+    func viewWillAppear() {
+        getFavoriteUsers()
     }
     
     private func getFavoriteUsers() {

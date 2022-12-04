@@ -65,9 +65,10 @@ struct ApiManager: ApiManagerInterface {
                     DispatchQueue.main.async {
                         onCompletion(.success(UIImage(data: data)!))
                     }
-                } else {
+                }
+                if let error = error {
                     DispatchQueue.main.async {
-                        onCompletion(.failure(error!))
+                        onCompletion(.failure(error))
                     }
                 }
             }

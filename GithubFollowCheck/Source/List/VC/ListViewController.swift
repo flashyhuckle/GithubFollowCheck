@@ -2,8 +2,6 @@ import UIKit
 
 class ListViewController: UIViewController {
     
-//    let defaults = UserDefaults.standard
-    
     //MARK: - Properties
     private var favoriteUsers = [String]() {
         didSet {
@@ -79,16 +77,17 @@ class ListViewController: UIViewController {
         setupNavigationItems()
         viewModel.viewDidLoad()
         
-//        favoriteUsers = defaults.array(forKey: "favoriteUsers") as! [String]
-        
         viewModel.didReceiveUsers = { [ weak self ] users in
             self?.results += users
         }
         
-        viewModel.didReceiveFavoriteUsers = { [ weak self ] favoriteUsers in
-            //CZEMU KURWA NIE DZIAŁA
-            self?.favoriteUsers = favoriteUsers
+        viewModel.didReceiveFavoriteUsers = { [ weak self ] users in
+            self?.favoriteUsers = users
         }
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        viewModel.viewWillAppear()
     }
 
     private func setUpViews() {
