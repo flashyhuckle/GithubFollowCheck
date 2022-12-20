@@ -47,13 +47,12 @@ class DetailViewController: UIViewController {
         view.addSubview(imageView)
         view.addSubview(label)
         
-        viewModel.getUserAvatar()
-        
         viewModel.didReceiveAvatar = { [ weak self ] avatar in
             DispatchQueue.main.async() {
                 self?.imageView.image = avatar
             }
         }
+        viewModel.getUserAvatar()
     }
     
     private func setUpConstraints() {

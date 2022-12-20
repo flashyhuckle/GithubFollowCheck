@@ -1,6 +1,6 @@
 import UIKit
 
-class ListViewController: UIViewController {
+final class ListViewController: UIViewController {
     
     //MARK: - Properties
     private var favoriteUsers = [String]() {
@@ -13,47 +13,47 @@ class ListViewController: UIViewController {
         }
     }
     
-    private var filteredArray = [User]()
+    private var filteredArray = [User]() {
+        didSet {
+            mainCollectionView.reloadData()
+        }
+    }
     
     private var results = [User]() {
         didSet {
             filteredArray = results
-            self.tableView.reloadData()
+            mainCollectionView.reloadData()
         }
     }
-    
-    private var didTapTableViewCell: ((User) -> Void)?
     
     //MARK: - ViewModel
     private let viewModel: ListViewModel
     
     //MARK: - Views
-    let searchBar: UISearchBar = {
-        let searchBar = UISearchBar()
-        searchBar.searchBarStyle = UISearchBar.Style.default
-        searchBar.placeholder = " Search..."
-        searchBar.isTranslucent = false
-        searchBar.sizeToFit()
-        searchBar.translatesAutoresizingMaskIntoConstraints = false
-        return searchBar
+    private lazy var collectionViewFlowLayout: UICollectionViewFlowLayout = {
+        let layout: UICollectionViewFlowLayout = UICollectionViewFlowLayout()
+        layout.scrollDirection = .vertical
+        layout.minimumLineSpacing = 10
+        layout.itemSize = .init(width: 100.0, height: 100.0)
+        return layout
     }()
-    
-    private var searchBarHeightConstraint: NSLayoutConstraint?
-    private var currentContentOffsetY: Double = 0
-    
-    private lazy var tableView: UITableView = {
-        let table = UITableView()
-        table.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
-        table.translatesAutoresizingMaskIntoConstraints = false
-        table.keyboardDismissMode = .onDrag
-        return table
+
+    private lazy var mainCollectionView: UICollectionView = {
+        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: collectionViewFlowLayout)
+        collectionView.translatesAutoresizingMaskIntoConstraints = false
+        collectionView.register(ListCollectionViewCell.self, forCellWithReuseIdentifier: "ListCollectionViewCell")
+        collectionView.delegate = self
+        collectionView.dataSource = self
+        return collectionView
     }()
     
     private lazy var favoritesBarButton = UIBarButtonItem(
-        image: UIImage(),
+        image: UIImage(systemName: "star"),
         style: .plain, target: self,
         action: #selector(favoritesPressed)
     )
+    
+    let searchController = UISearchController()
     
     //MARK: - Initialization
     init(
@@ -68,14 +68,11 @@ class ListViewController: UIViewController {
     }
     
     //MARK: - Lifecycle
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         setUpViews()
         setUpConstraints()
-        
         setupNavigationItems()
-        viewModel.viewDidLoad()
         
         viewModel.didReceiveUsers = { [ weak self ] users in
             self?.results += users
@@ -84,41 +81,30 @@ class ListViewController: UIViewController {
         viewModel.didReceiveFavoriteUsers = { [ weak self ] users in
             self?.favoriteUsers = users
         }
+        
+        viewModel.viewDidLoad()
     }
     
-    override func viewWillAppear(_ animated: Bool) {
-        viewModel.viewWillAppear()
-    }
-
     private func setUpViews() {
         title = viewModel.searchedUser
         view.backgroundColor = .red
         
-        tableView.delegate = self
-        tableView.dataSource = self
-        view.addSubview(tableView)
+        view.addSubview(mainCollectionView)
         
-        searchBar.delegate = self
-        view.addSubview(searchBar)
-        }
+        navigationItem.searchController = searchController
+        searchController.searchBar.delegate = self
+        searchController.hidesNavigationBarDuringPresentation = false
+    }
     
     private func setUpConstraints() {
-        searchBarHeightConstraint = searchBar.heightAnchor.constraint(equalToConstant: 40.0)
         NSLayoutConstraint.activate([
-            searchBar.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            searchBar.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            searchBar.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-        ])
-        searchBarHeightConstraint?.isActive = true
-
-        NSLayoutConstraint.activate([
-            tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            tableView.topAnchor.constraint(equalTo: searchBar.bottomAnchor),
-            tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+            mainCollectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            mainCollectionView.topAnchor.constraint(equalTo: view.topAnchor),
+            mainCollectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            mainCollectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
     }
-
+    
     private func setupNavigationItems() {
         navigationItem.rightBarButtonItem = favoritesBarButton
     }
@@ -135,81 +121,52 @@ class ListViewController: UIViewController {
     }
 }
 
-//MARK: TableView functions
+extension ListViewController: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
 
-extension ListViewController: UITableViewDelegate, UITableViewDataSource {
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return filteredArray.count
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        filteredArray.count
     }
     
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        if let cell = tableView.dequeueReusableCell(withIdentifier: "cell") {
-            cell.textLabel?.text = filteredArray[indexPath.row].name
-            cell.accessoryType = .disclosureIndicator
-            return cell
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        guard let cell = collectionView.dequeueReusableCell(
+            withReuseIdentifier: "ListCollectionViewCell",
+            for: indexPath
+        ) as? ListCollectionViewCell else {
+            return UICollectionViewCell()
         }
-        return UITableViewCell()
+        cell.update(user: filteredArray[indexPath.item])
+        return cell
+    }
+
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        let availableWidth = mainCollectionView.frame.width
+        let widthPerItem  = availableWidth * 0.3
+        
+        return CGSizeMake(widthPerItem, widthPerItem)
+    }
+
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        print(indexPath)
+        viewModel.onTapCollectionViewCell(user: filteredArray[indexPath.item])
     }
     
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        viewModel.onTapTableViewCell(user: filteredArray[indexPath.row])
-        tableView.deselectRow(at: indexPath, animated: true)
-    }
-    
-    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+    func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
         let lastItem = results.count
-        if indexPath.row == lastItem - 1 {
+        if indexPath.item == lastItem - 1 {
             viewModel.getNextPageUsers()
         }
     }
-
-    func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        
-        if scrollView.contentOffset.y == 0 {
-            searchBarHeightConstraint?.constant = 40
-        }
-        
-        guard scrollView.contentOffset.y > 0 else { return }
-
-        if currentContentOffsetY > scrollView.contentOffset.y {
-            guard searchBarHeightConstraint?.constant != 40 else { return }
-            let growingHeight = currentContentOffsetY - scrollView.contentOffset.y
-            let currentHeight = searchBarHeightConstraint?.constant ?? 0.0
-            if growingHeight < 40.0 && growingHeight > currentHeight {
-                searchBarHeightConstraint?.constant = growingHeight
-            } else if growingHeight > 40 {
-                searchBarHeightConstraint?.constant = 40
-            }
-
-        } else if currentContentOffsetY < scrollView.contentOffset.y {
-            guard searchBarHeightConstraint?.constant != 0 else { return }
-            let shrinkingHeight = scrollView.contentOffset.y - currentContentOffsetY
-            let currentHeight = searchBarHeightConstraint?.constant ?? 0.0
-            if shrinkingHeight < currentHeight && shrinkingHeight > 0 {
-                searchBarHeightConstraint?.constant = currentHeight - shrinkingHeight
-            } else if shrinkingHeight > currentHeight {
-                searchBarHeightConstraint?.constant = 0
-            }
-        }
-    }
-
-    func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
-        currentContentOffsetY = scrollView.contentOffset.y
-    }
-
-    func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
-        currentContentOffsetY = scrollView.contentOffset.y
-    }
 }
 
-//MARK: Searchbar Delegate
-
-extension ListViewController: UISearchBarDelegate {
+extension ListViewController: UISearchControllerDelegate, UISearchBarDelegate {
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         filteredArray = results.filter { $0.name.lowercased().contains(searchText.lowercased()) }
         if searchText.isEmpty {
             filteredArray = results
         }
-        tableView.reloadData()
+    }
+    
+    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
+        filteredArray = results
     }
 }

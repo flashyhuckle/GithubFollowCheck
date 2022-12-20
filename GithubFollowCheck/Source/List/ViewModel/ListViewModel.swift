@@ -1,4 +1,4 @@
-import Foundation
+import UIKit
 
 final class ListViewModel {
     
@@ -14,6 +14,7 @@ final class ListViewModel {
     
     var didReceiveUsers: (([User]) -> Void)?
     var didReceiveFavoriteUsers: (([String]) -> Void)?
+    var didReceiveAvatar: ((UIImage?) -> Void)?
     
     // MARK: - Initialization
     
@@ -27,11 +28,9 @@ final class ListViewModel {
         self.didTapTableViewCell = didTapTableViewCell
     }
     
+    //MARK: - Lifecycle
     func viewDidLoad() {
         getUsers()
-    }
-    
-    func viewWillAppear() {
         getFavoriteUsers()
     }
     
@@ -69,7 +68,19 @@ final class ListViewModel {
         }
     }
 
-    func onTapTableViewCell(user: User) {
+    func onTapCollectionViewCell(user: User) {
         didTapTableViewCell?(user)
+    }
+    
+    func getUserAvatar(user: User) {
+        apiManager.getUserAvatar(urlString: user.avatarURL) { result in
+            switch result {
+            case .success(let avatar):
+                self.didReceiveAvatar?(avatar)
+            case .failure(let error):
+                print("Error: \(error)")
+            }
+            
+        }
     }
 }

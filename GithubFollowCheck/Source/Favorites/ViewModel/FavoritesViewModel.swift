@@ -19,6 +19,7 @@ final class FavoritesViewModel {
         self.didTapTableViewCell = didTapTableViewCell
     }
     
+    //MARK: - Lifecycle
     func viewWillAppear() {
         getFavoriteUsers()
     }

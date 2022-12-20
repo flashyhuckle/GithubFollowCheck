@@ -1,30 +1,22 @@
-import Foundation
 import UIKit
 
-final class DetailViewModel {
+final class ListCollectionViewCellViewModel {
     
-    //MARK: - Input
+    // MARK: - Input
+    let apiManager: ApiManagerInterface
     
-    let user: User
-    private let apiManager: ApiManagerInterface
-    
-    //MARK: - Output
-    
+    // MARK: - Output
     var didReceiveAvatar: ((UIImage?) -> Void)?
     
-    //MARK: - Initialization
-    
+    // MARK: - Initialization
     init(
-        user: User,
         apiManager: ApiManagerInterface
     ) {
-        self.user = user
         self.apiManager = apiManager
     }
     
     //MARK: - Lifecycle
-    
-    func getUserAvatar() {
+    func getUserAvatar(user: User) {
         apiManager.getUserAvatar(urlString: user.avatarURL) { result in
             switch result {
             case .success(let avatar):
