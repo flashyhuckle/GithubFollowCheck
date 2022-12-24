@@ -5,8 +5,6 @@ final class ListCollectionViewCell: UICollectionViewCell {
     // MARK: - User Actions
 
     var onUserTap: (() -> Void)?
-    
-    var viewModel = ListCollectionViewCellViewModel(apiManager: ApiManager())
 
     // MARK: - Information Views
 
@@ -55,13 +53,12 @@ final class ListCollectionViewCell: UICollectionViewCell {
     // MARK: - Update
     
     func update(
-        user: User
+        user: User,
+        viewModel: ListCollectionViewCellViewModel
     ) {
         titleLabel.text = user.name
         viewModel.didReceiveAvatar = { [ weak self ] avatar in
-            DispatchQueue.main.async() {
                 self?.avatarImageView.image = avatar
-            }
         }
         viewModel.getUserAvatar(user: user)
     }

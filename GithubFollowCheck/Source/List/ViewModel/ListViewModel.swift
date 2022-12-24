@@ -6,7 +6,7 @@ final class ListViewModel {
     
     private let userDefaults: UserDefaults = .standard
     let searchedUser: String
-    private let apiManager: ApiManagerInterface
+    let apiManager: ApiManagerInterface
     private let didTapTableViewCell: ((User) -> Void)?
     private var currentPage = 1
     
@@ -14,7 +14,7 @@ final class ListViewModel {
     
     var didReceiveUsers: (([User]) -> Void)?
     var didReceiveFavoriteUsers: (([String]) -> Void)?
-    var didReceiveAvatar: ((UIImage?) -> Void)?
+//    var didReceiveAvatar: ((UIImage?) -> Void)?
     
     // MARK: - Initialization
     
@@ -72,15 +72,15 @@ final class ListViewModel {
         didTapTableViewCell?(user)
     }
     
-    func getUserAvatar(user: User) {
-        apiManager.getUserAvatar(urlString: user.avatarURL) { result in
-            switch result {
-            case .success(let avatar):
-                self.didReceiveAvatar?(avatar)
-            case .failure(let error):
-                print("Error: \(error)")
-            }
-            
-        }
-    }
+//    func getUserAvatar(user: User) {
+//        apiManager.getUserAvatar(urlString: user.avatarURL) { result in
+//            switch result {
+//            case .success(let avatar):
+//                self.didReceiveAvatar?(avatar)
+//            case .failure(let error):
+//                print("Error: \(error)")
+//            }
+//
+//        }
+//    }
 }

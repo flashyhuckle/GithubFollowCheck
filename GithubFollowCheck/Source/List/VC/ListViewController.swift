@@ -134,7 +134,8 @@ extension ListViewController: UICollectionViewDelegate, UICollectionViewDataSour
         ) as? ListCollectionViewCell else {
             return UICollectionViewCell()
         }
-        cell.update(user: filteredArray[indexPath.item])
+        let viewModel = ListCollectionViewCellViewModel(apiManager: self.viewModel.apiManager)
+        cell.update(user: filteredArray[indexPath.item], viewModel: viewModel)
         return cell
     }
 
@@ -146,7 +147,6 @@ extension ListViewController: UICollectionViewDelegate, UICollectionViewDataSour
     }
 
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        print(indexPath)
         viewModel.onTapCollectionViewCell(user: filteredArray[indexPath.item])
     }
     
